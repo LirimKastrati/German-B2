@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Deutsch B2 Coach</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f766e">
+<!-- iOS: open as a standalone app when added to the home screen -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="B2 Coach">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<style>
+/* ===================== DESIGN TOKENS ===================== */
+:root{
+  --bg:#f6f7f9; --card:#ffffff; --text:#1b1f24; --muted:#5f6b7a; --line:#e3e7ec;
+  --accent:#1f5fbf; --accent-weak:#e8f0fe; --good:#1a7f37; --good-bg:#e6f4ea;
+  --bad:#c62828; --bad-bg:#fdecec; --warn-bg:#fff6dd; --warn:#7a5b00;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0f1216; --card:#181c22; --text:#e6e9ee; --muted:#9aa5b3; --line:#2a313a;
+    --accent:#5b9bff; --accent-weak:#1b2a44; --good:#4cc764; --good-bg:#12291a;
+    --bad:#ff7b7b; --bad-bg:#3a1717; --warn-bg:#3a3214; --warn:#f2d27a;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.topbar{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;
+  padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;background:var(--bg);border-bottom:1px solid var(--line)}
+.topbar h1{font-size:17px;margin:0}
+#streakBadge{font-size:14px;font-weight:600;color:var(--muted)}
+main{max-width:640px;margin:0 auto;padding:16px 16px calc(96px + env(safe-area-inset-bottom))}
+.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:5;display:flex;background:var(--card);
+  border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.tabbar button{flex:1;background:none;border:0;padding:8px 0 10px;color:var(--muted);font-size:11px;
+  display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+.tabbar .ic{font-size:20px;line-height:1.1}
+.tabbar button.active{color:var(--accent);font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+h2{font-size:20px;margin:0 0 8px} h3{font-size:16px;margin:0 0 8px}
+p{margin:6px 0}
+.muted{color:var(--muted);font-size:14px}
+.small{font-size:13px}
+.de{font-size:17px;line-height:1.6}
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:10px;padding:12px 16px;
+  font-size:16px;font-weight:600;background:var(--accent);color:#fff;cursor:pointer;width:100%;margin-top:10px;font-family:inherit}
+.btn.secondary{background:var(--accent-weak);color:var(--accent)}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--line)}
+.btn.danger{background:var(--bad-bg);color:var(--bad)}
+.btn.sm{padding:8px 12px;font-size:14px;margin-top:6px}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:8px;flex-wrap:wrap} .row>*{flex:1 1 0;min-width:0}
+input,textarea,select{width:100%;font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+  background:var(--card);color:var(--text);font-family:inherit}
+textarea{min-height:150px;resize:vertical;line-height:1.5}
+label{display:block;font-weight:600;font-size:14px;margin:14px 0 4px}
+.hidden{display:none!important}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;background:var(--accent-weak);color:var(--accent)}
+.pill.good{background:var(--good-bg);color:var(--good)} .pill.bad{background:var(--bad-bg);color:var(--bad)}
+.banner{background:var(--warn-bg);color:var(--warn);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:14px}
+.banner .btn{margin-top:8px}
+.error-box{background:var(--bad-bg);color:var(--bad);border-radius:12px;padding:12px 14px;margin:10px 0;font-size:14px;white-space:pre-wrap}
+.diff del{background:var(--bad-bg);color:var(--bad);text-decoration:line-through;border-radius:3px;padding:0 2px}
+.diff ins{background:var(--good-bg);color:var(--good);text-decoration:none;border-radius:3px;padding:0 2px;font-weight:600}
+.task{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.task:last-child{border-bottom:0}
+.task .ico{font-size:22px;width:30px;text-align:center}
+.task .info{flex:1}
+.task.done .info{opacity:.55;text-decoration:line-through}
+.task .btn{width:auto;margin:0}
+.opt{display:block;width:100%;text-align:left;padding:10px 12px;margin:6px 0;border:1px solid var(--line);border-radius:10px;
+  background:var(--card);color:var(--text);font-size:15px;cursor:pointer;font-family:inherit}
+.opt.correct{border-color:var(--good);background:var(--good-bg)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.q{padding:10px 0;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:0}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:4px}
+.bar>span{display:block;height:100%;background:var(--accent);border-radius:4px}
+.bar>span.shrink{width:100%;background:var(--good);animation:shrink linear forwards}
+@keyframes shrink{from{width:100%}to{width:0}}
+.say-status p{margin:6px 0 2px}
+.err{padding:10px 0;border-bottom:1px solid var(--line)} .err:last-child{border-bottom:0}
+.err .wr{color:var(--bad);text-decoration:line-through} .err .rt{color:var(--good);font-weight:600}
+.blank{display:inline-block;min-width:60px;border-bottom:2px solid var(--accent);text-align:center}
+.linkbtn{background:none;border:0;color:var(--accent);font-size:14px;cursor:pointer;padding:8px;font-family:inherit}
+/* Flashcards */
+.flash{min-height:180px;display:flex;flex-direction:column;justify-content:center;text-align:center}
+.flash .front{font-size:24px;font-weight:700}
+.chart{display:flex;align-items:flex-end;gap:6px;height:130px;margin-top:8px}
+.chart .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;font-size:11px;color:var(--muted)}
+.chart .col span{display:block;width:100%;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px}
+.stats{display:flex;gap:10px} .stats>div{flex:1;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 4px}
+.stats b{display:block;font-size:22px}
+.spinner{display:inline-block;width:18px;height:18px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading{text-align:center;padding:30px 0;color:var(--muted)}
+#toast{position:fixed;left:16px;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));max-width:600px;margin:0 auto;
+  background:#222;color:#fff;padding:12px 14px;border-radius:12px;font-size:14px;z-index:20;opacity:0;transition:opacity .25s;pointer-events:none}
+#toast.show{opacity:.95}
+details summary{cursor:pointer;font-weight:600;color:var(--accent)}
+.topic-row{display:flex;align-items:center;gap:8px}
+.topic-ic{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;background:#ccfbf1;color:#0f766e;flex:0 0 auto}
+@media (prefers-color-scheme: dark){ .topic-ic{background:#134e4a;color:#5eead4} }
+/* Tap-to-gloss */
+.w{cursor:pointer;border-bottom:1px dotted var(--muted);border-radius:3px}
+.w.active{background:var(--accent-weak);border-bottom-color:var(--accent)}
+#glossPop{position:fixed;left:12px;right:12px;bottom:calc(72px + env(safe-area-inset-bottom));max-width:600px;margin:0 auto;z-index:15;
+  background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 16px;box-shadow:0 8px 30px rgba(0,0,0,.18)}
+#glossPop p{margin:4px 0}
+.at-badge{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.5px;padding:1px 5px;border-radius:5px;
+  background:#c8102e;color:#fff;vertical-align:super;line-height:1.3;border:0;cursor:pointer;margin-left:2px}
+.kv{display:flex;justify-content:space-between;gap:8px;padding:4px 0}
+ul.clean{padding-left:18px;margin:6px 0}
+</style>
+</head>
+<body>
+<header class="topbar"><h1 id="pageTitle">Deutsch B2 Coach</h1><span id="streakBadge"></span></header>
+<main id="view"></main>
+<nav class="tabbar" id="tabbar">
+  <button data-tab="today"><span class="ic">🏠</span>Today</button>
+  <button data-tab="practice"><span class="ic">🎯</span>Practice</button>
+  <button data-tab="cards"><span class="ic">🃏</span>Cards</button>
+  <button data-tab="progress"><span class="ic">📈</span>Progress</button>
+  <button data-tab="settings"><span class="ic">⚙️</span>Settings</button>
+</nav>
+<div id="toast"></div>
+<div id="glossPop" class="hidden" role="dialog" aria-label="Word meaning"></div>
+
+<script>
+'use strict';
+/* =====================================================================
+   1. CONFIGURATION – change things here
+   ===================================================================== */
+const CLAUDE_MODEL = 'claude-sonnet-5-5';          // <- the one place to change the Claude model
+const CLAUDE_URL   = 'https://api.anthropic.com/v1/messages';
+// If Claude's safety filter ever declines a request, the API can retry it on
+// another model automatically ("server-side fallback"). Set to false to turn off.
+const USE_SERVER_FALLBACK = true;
+
+const STREAK_MIN_MINUTES = 10;    // minutes needed on a day for it to count for the streak
+
+const ERROR_CATEGORIES = ['verb_position','subordinate_clause_verb_end','separable_verbs','case_accusative',
+  'case_dative','prepositions_with_case','adjective_endings','articles_gender','perfekt_praeteritum',
+  'modal_verbs','konjunktiv_ii','connectors','word_choice','spelling','plural_forms','other'];
+const CATEGORY_LABELS = {
+  verb_position:'Verb position (V2)', subordinate_clause_verb_end:'Verb at end (weil/dass…)',
+  separable_verbs:'Separable verbs', case_accusative:'Accusative', case_dative:'Dative',
+  prepositions_with_case:'Prepositions + case', adjective_endings:'Adjective endings',
+  articles_gender:'Articles & gender', perfekt_praeteritum:'Perfekt / Präteritum', modal_verbs:'Modal verbs',
+  konjunktiv_ii:'Konjunktiv II', connectors:'Connectors', word_choice:'Word choice', spelling:'Spelling',
+  plural_forms:'Plural forms', other:'Other'
+};
+const LEVELS = ['A1','A2','B1','B2','C1'];
+// No audio input → speaking can't be assessed. Typed production counts towards writing.
+const SKILLS = ['reading','writing','listening'];
+const SKILL_ICON = {reading:'📖', writing:'✍️', listening:'🎧'};
+const START_LEVELS = {reading:'B1', writing:'A2', listening:'B1'};   // your self-assessment
+
+// Each sub-topic: [description, icon]. Icons: lab, flat, office, cycling, news, social (see TOPIC_ICONS).
+const TOPICS = [
+  {id:'work', name:'Work & lab', sub:[['explaining an experiment with fungi to a new colleague','lab'], ['discussing screening results','lab'],
+    ['a short lab meeting','lab'], ['writing to a colleague at BOKU','office'], ['ordering lab supplies','lab'], ['lab safety rules','lab'],
+    ['a problem with a lab instrument','lab'], ['planning the week with the group leader','lab'], ['a conference or seminar at BOKU','social']]},
+  {id:'daily', name:'Daily life & offices', sub:[['flat hunting in Vienna','flat'], ['a broken heater – contacting the landlord','flat'],
+    ['an appointment at MA 35 (residence permit)','office'], ['a doctor\'s appointment','office'], ['a problem at the bank','office'],
+    ['shopping at the Naschmarkt','social'], ['Wiener Linien / public transport','cycling'], ['registering your address (Meldezettel)','office'],
+    ['returning something at a shop','social']]},
+  {id:'social', name:'Small talk & social', sub:[['cycling in Vienna','cycling'], ['weekend plans','social'], ['travel experiences','social'],
+    ['hobbies','social'], ['meeting friends at a Heuriger','social'], ['sport and fitness','cycling'], ['cooking and food','social'],
+    ['films and series','social'], ['the weather and seasons','social']]},
+  {id:'news', name:'News & society', sub:[['environment and climate in Vienna','news'], ['technology and AI at work','news'],
+    ['work–life balance','news'], ['housing prices in Vienna','flat'], ['expansion of public transport','news'], ['remote work','news'],
+    ['the healthcare system','news'], ['tourism in Vienna','news'], ['bike lanes and traffic','cycling']]}
+];
+// Simple line icons (inline SVG, 24×24, drawn with the current text colour)
+const TOPIC_ICONS = {
+  lab:     '<path d="M9 3h6M10 3v6.5L4.6 18.2A1.9 1.9 0 0 0 6.2 21h11.6a1.9 1.9 0 0 0 1.6-2.8L14 9.5V3"/><path d="M7.5 15h9"/>',
+  flat:    '<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-5.5h4V20"/>',
+  office:  '<path d="M3 21h18M4.5 9.5h15M12 3l8.5 4.5h-17z"/><path d="M6.5 9.5V18M10.2 9.5V18M13.8 9.5V18M17.5 9.5V18M4 18h16"/>',
+  cycling: '<circle cx="6" cy="16.5" r="3.5"/><circle cx="18" cy="16.5" r="3.5"/><path d="M6 16.5 9.5 9h6l2.5 7.5M9.5 9l2.8 7.5h-6M13.5 6h3l-1 3"/>',
+  news:    '<path d="M4 5h12v14H6.2A2.2 2.2 0 0 1 4 16.8z"/><path d="M16 8.5h3.5v8.3A2.2 2.2 0 0 1 17.3 19H16M7 9h6M7 12.5h6M7 16h3.5"/>',
+  social:  '<path d="M3.5 5h11v7.5H8L4.5 15.5V12.5h-1z"/><path d="M14.5 9h6v7.5h-1v3l-3.5-3h-6V13"/>'
+};
+function topicIcon(name, size = 22){
+  return `<svg class="ticon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${TOPIC_ICONS[name] || TOPIC_ICONS.news}</svg>`;
+}
+/** Header row for an exercise card: topic icon + label */
+function topicRow(topic, label){
+  return `<div class="topic-row"><span class="topic-ic">${topicIcon(topic.icon)}</span><span class="pill">${esc(label || topic.group)}</span></div>`;
+}
+
+/* =====================================================================
+   2. SMALL HELPERS
+   ===================================================================== */
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function todayStr(d=new Date()){ const z=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`; }
+function addDays(dateStr, n){ const d=new Date(dateStr+'T12:00:00'); d.setDate(d.getDate()+n); return todayStr(d); }
+function daysBetween(a, b){ return Math.round((new Date(b+'T12:00:00') - new Date(a+'T12:00:00'))/86400000); }
+function levelIdx(l){ const i = LEVELS.indexOf(String(l||'').toUpperCase().slice(0,2)); return i<0 ? 2 : i; }
+function normLevel(l){ const s=String(l||'').toUpperCase().trim().slice(0,2); return LEVELS.includes(s) ? s : null; }
+function normCat(c){ const s=String(c||'').trim().toLowerCase(); return ERROR_CATEGORIES.includes(s) ? s : 'other'; }
+function wordCount(t){ return (String(t).trim().match(/\S+/g)||[]).length; }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+let toastTimer;
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'), 3200); }
+function loadingHTML(msg='Thinking…'){ return `<div class="loading"><span class="spinner"></span><p>${esc(msg)}</p></div>`; }
+function errorHTML(err){ return `<div class="error-box">⚠️ ${esc(err && err.message ? err.message : err)}</div>`; }
+
+/* =====================================================================
+   3. STORAGE (localStorage) – keys and progress are stored separately.
+      Export/import only touches PROGRESS, never your API keys.
+   ===================================================================== */
+const SETTINGS_KEY = 'dbc_settings';
+const PROGRESS_KEY = 'dbc_progress';
+
+function loadJSON(key, fallback){ try{ const v=localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }catch(e){ return fallback; } }
+
+function defaultSettings(){
+  return { anthropicKey:'', voiceURI:'' };
+}
+function defaultProgress(){
+  return {
+    version:1, createdAt:todayStr(), placementDone:false,
+    levels:Object.assign({}, START_LEVELS),  // self-assessment as a start
+    startLevels:null,           // set by the placement check; used to adapt the session split
+    dailyGoal:45, sessionLength:30,
+    minutesLog:{},              // { 'YYYY-MM-DD': minutes }
+    errors:[],                  // { date, skill, category, wrong, right, explanation_en }
+    flashcards:[],              // { id, de, en, example_de, ef, reps, interval, due, added }
+    evidence:[],                // { date, skill, level?, score? } – used for the weekly level estimate
+    drills:[],                  // { date, category, correct }
+    weeklyReports:[],           // { date, levels, improved_en, focus_en }
+    counts:{produce:0, readwrite:0, listening:0, grammar:0, cards:0, cloze:0},
+    topicCounter:0, todaySession:null, lastExport:null
+  };
+}
+let settings = Object.assign(defaultSettings(), loadJSON(SETTINGS_KEY, {}));
+let P = Object.assign(defaultProgress(), loadJSON(PROGRESS_KEY, {}));
+
+/** Clean up data saved by older versions (voice recording was removed). Runs at start-up and after import. */
+function migrateData(){
+  // forget the old transcription key/settings on this device
+  if(['sttProvider','sttKey','groqModel','openaiModel'].some(k => k in settings)){
+    ['sttProvider','sttKey','groqModel','openaiModel'].forEach(k => delete settings[k]); saveSettings();
+  }
+  delete P.levels.speaking; if(P.startLevels) delete P.startLevels.speaking;
+  SKILLS.forEach(s => { if(!normLevel(P.levels[s])) P.levels[s] = START_LEVELS[s]; });
+  // today's plan may contain old task types (speaking / role-play) → re-plan
+  if(P.todaySession && P.todaySession.tasks.some(t => !TASK_INFO[t.type])) P.todaySession = null;
+  saveProgress();
+}
+
+function saveSettings(){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
+function saveProgress(){
+  // keep the logs from growing forever
+  if(P.errors.length > 1500) P.errors = P.errors.slice(-1500);
+  if(P.evidence.length > 800) P.evidence = P.evidence.slice(-800);
+  if(P.drills.length > 1500) P.drills = P.drills.slice(-1500);
+  try{ localStorage.setItem(PROGRESS_KEY, JSON.stringify(P)); }
+  catch(e){ toast('Could not save progress (storage full?). Please export a backup.'); }
+  updateStreakBadge();
+}
+
+function exportProgress(){
+  P.lastExport = todayStr(); saveProgress();
+  const blob = new Blob([JSON.stringify(P, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `deutsch-b2-coach-progress-${todayStr()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+  toast('Progress exported. Keep the file somewhere safe (e.g. iCloud Drive).');
+}
+function importProgress(file){
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const data = JSON.parse(reader.result);
+      if(!data || !data.levels || !Array.isArray(data.errors)) throw new Error('This does not look like a Deutsch B2 Coach export.');
+      if(!confirm('Replace ALL progress on this device with the imported file?')) return;
+      P = Object.assign(defaultProgress(), data);
+      migrateData(); toast('Progress imported ✓'); go('today');
+    }catch(e){ alert('Import failed: '+e.message); }
+  };
+  reader.readAsText(file);
+}
+
+/* ---------- minutes, streak ---------- */
+function addMinutes(m){ const d=todayStr(); P.minutesLog[d] = (P.minutesLog[d]||0) + m; }
+function minutesOn(d){ return P.minutesLog[d] || 0; }
+function streak(){
+  let d = todayStr(), n = 0;
+  if(minutesOn(d) < STREAK_MIN_MINUTES) d = addDays(d, -1);   // today not done yet → streak still alive from yesterday
+  while(minutesOn(d) >= STREAK_MIN_MINUTES){ n++; d = addDays(d, -1); }
+  return n;
+}
+function minutesLastDays(n){ let s=0; for(let i=0;i<n;i++) s += minutesOn(addDays(todayStr(), -i)); return s; }
+function updateStreakBadge(){ const s=streak(); $('#streakBadge').textContent = s ? `🔥 ${s} day${s>1?'s':''}` : ''; }
+
+/* =====================================================================
+   4. CLAUDE API (direct browser call) + JSON parsing / validation
+   ===================================================================== */
+let serverFallbackWorks = true;
+
+async function callClaude({system, messages, maxTokens=8000, effort='medium'}){
+  if(!settings.anthropicKey) throw new Error('No Anthropic API key yet – add it in Settings.');
+  const headers = {
+    'content-type':'application/json',
+    'x-api-key': settings.anthropicKey,
+    'anthropic-version':'2023-06-01',
+    'anthropic-dangerous-direct-browser-access':'true'
+  };
+  const body = { model:CLAUDE_MODEL, max_tokens:maxTokens, system, messages, output_config:{effort} };
+  if(USE_SERVER_FALLBACK && serverFallbackWorks){
+    headers['anthropic-beta'] = 'server-side-fallback-2026-07-01';
+    body.fallbacks = 'default';
+  }
+  let res;
+  try{ res = await fetch(CLAUDE_URL, {method:'POST', headers, body:JSON.stringify(body)}); }
+  catch(e){ throw new Error('Network error while contacting Claude. Are you online?'); }
+  if(!res.ok){
+    const txt = await res.text();
+    // If the fallback option is rejected for some reason, switch it off and try again once.
+    if(res.status === 400 && body.fallbacks && /fallback|beta/i.test(txt)){
+      serverFallbackWorks = false;
+      return callClaude({system, messages, maxTokens, effort});
+    }
+    throw new Error(friendlyHttpError('Claude', res.status, txt));
+  }
+  const data = await res.json();
+  if(data.stop_reason === 'refusal') throw new Error('Claude declined this request. Please try again with a different task.');
+  // Responses can contain "thinking" blocks – we only want the text blocks.
+  return (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('').trim();
+}
+
+function friendlyHttpError(service, status, txt){
+  let msg = txt;
+  try{ const j = JSON.parse(txt); msg = (j.error && (j.error.message || j.error)) || j.message || txt; }catch(e){}
+  const hints = {401:'The API key is wrong or was revoked – check Settings.', 403:'This key has no permission for this request.',
+                 429:'Rate limit or no credit left – wait a moment or check your billing.', 529:'The service is overloaded – try again in a minute.'};
+  return `${service} error ${status}: ${String(msg).slice(0,300)}${hints[status] ? '\n'+hints[status] : ''}`;
+}
+
+/** Remove ```json fences and pull out the JSON object. */
+function parseJSONLoose(text){
+  let t = String(text||'').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/,'');
+  try{ return JSON.parse(t); }
+  catch(e){
+    const a = t.indexOf('{'), b = t.lastIndexOf('}');
+    if(a >= 0 && b > a) return JSON.parse(t.slice(a, b+1));
+    throw e;
+  }
+}
+
+/** Tiny schema validator.
+ *  'string' | 'number' | 'boolean' | 'any'  (add '?' to make it optional)
+ *  [itemSchema] = array of items, { key: schema } = object */
+function validate(obj, schema, path='root'){
+  if(typeof schema === 'string'){
+    const optional = schema.endsWith('?'), type = schema.replace('?','');
+    if(obj === undefined || obj === null) return optional ? [] : [`${path} is missing`];
+    if(type === 'any') return [];
+    return typeof obj === type ? [] : [`${path} should be a ${type}`];
+  }
+  if(schema.__map){                       // { anyKey: itemSchema } – e.g. a glossary keyed by word
+    if(typeof obj !== 'object' || obj === null || Array.isArray(obj)) return [`${path} should be an object keyed by word`];
+    return Object.keys(obj).flatMap(k => validate(obj[k], schema.__map, `${path}["${k}"]`));
+  }
+  if(Array.isArray(schema)){
+    if(!Array.isArray(obj)) return [`${path} should be an array`];
+    return obj.flatMap((item, i) => validate(item, schema[0], `${path}[${i}]`));
+  }
+  if(typeof obj !== 'object' || obj === null || Array.isArray(obj)) return [`${path} should be an object`];
+  return Object.keys(schema).flatMap(k => validate(obj[k], schema[k], `${path}.${k}`));
+}
+
+/** Ask Claude for JSON, validate it, retry once if invalid. */
+async function askJSON({prompt, schema, effort='medium', maxTokens=8000}){
+  const system = systemPrompt();
+  const messages = [{role:'user', content:prompt}];
+  let problems = [];
+  for(let attempt = 0; attempt < 2; attempt++){
+    const text = await callClaude({system, messages, effort, maxTokens});
+    let obj = null;
+    try{ obj = parseJSONLoose(text); problems = validate(obj, schema); }
+    catch(e){ problems = ['the reply was not valid JSON']; }
+    if(!problems.length) return obj;
+    messages.push({role:'assistant', content: text || '(empty reply)'});
+    messages.push({role:'user', content:`Your reply was invalid: ${problems.slice(0,6).join('; ')}. Reply again with ONLY the complete, corrected JSON object – no markdown, no comments.`});
+  }
+  throw new Error('Claude returned invalid data twice ('+problems.slice(0,3).join('; ')+'). Please try again.');
+}
+
+function systemPrompt(){
+  const L = P.levels;
+  return `You are "Deutsch B2 Coach", a German teacher for one adult learner.
+Learner: Lirim, 27, non-native speaker living in Vienna, works as technical staff in a microbiology lab at BOKU University (fungi, screening, experiments, colleagues, meetings, emails).
+Current levels: reading ${L.reading}, writing ${L.writing}, listening ${L.listening}. The learner practises production by TYPING short answers (no audio). Goal: general B2.
+Rules:
+- German content and corrections in German; explanations in English, short and concrete.
+- Only the 2–3 most important errors per answer.
+- Encouraging but honest tone. No excessive praise.
+- Use standard German. Austrian words only where the task asks for them, always with the standard German equivalent.
+- Error categories must be exactly one of: ${ERROR_CATEGORIES.join(', ')}.
+OUTPUT FORMAT: reply with ONE valid JSON object only – no markdown fences, no text before or after it.`;
+}
+
+/* ---------- JSON schemas for each kind of response ---------- */
+const S_QUESTION = {question_de:'string', options:['string'], answer_index:'number', explanation_en:'string'};
+// Tap-to-gloss glossary: { "Experimente": {base, en, article?, plural?, at?}, … }
+const S_GLOSSARY = {__map: {base:'string', en:'string', article:'string?', plural:'string?', at:'string?'}};
+/** Prompt text describing the glossary, reused for reading, listening and model answers. */
+function glossSpec(textName){
+  return `an object keyed by the EXACT word form as it appears in the ${textName} (same spelling and inflection, e.g. "Experimente", "ging", "Pilzen"; single words, or a 2–3 word fixed expression), covering 12–25 words that may be new for a ${P.levels.reading} learner (skip very basic words like "und", "ich", "ist"). Each value: {"base": dictionary form (infinitive for verbs, singular for nouns, e.g. "das Experiment"), "en": short English meaning in this context, "article": "der"/"die"/"das" for nouns (omit otherwise), "plural": plural for nouns, e.g. "die Experimente" (omit otherwise), "at": ONLY if the word is Austrian German, its standard German equivalent (omit otherwise)}`;
+}
+const SCHEMA = {
+  correction: { original:'string', corrected:'string', natural_version:'string',
+    errors:[{category:'string', wrong:'string', right:'string', explanation_en:'string'}],
+    new_vocab:[{de:'string', en:'string', example_de:'string'}], estimated_level:'string', comment_en:'string?' },
+  situation: { title_en:'string', situation_en:'string', task_de:'string', useful_phrases:[{de:'string', en:'string'}] },
+  reading: { title:'string', text_type:'string', text_de:'string', glossary:S_GLOSSARY,
+    questions:[S_QUESTION], writing_task_en:'string', writing_task_de:'string' },
+  listening: { title:'string', script_de:'string', austrian:[{austrian:'string', standard_de:'string', en:'string'}],
+    glossary:S_GLOSSARY, questions:[S_QUESTION] },
+  grammar: { exercises:[{category:'string', type:'string', instruction_en:'string', prompt_de:'string', options:'any?',
+    answer:'string', explanation_en:'string'}] },
+  placementContent: { reading:{ text_de:'string', questions:[S_QUESTION] }, listening:{ script_de:'string', questions:[S_QUESTION] } },
+  levels: { levels:{reading:'string', writing:'string', listening:'string'}, improved_en:'string', focus_en:'string' }
+};
+SCHEMA.writingCorrection = Object.assign({}, SCHEMA.correction, {model_answer:'string', model_answer_glossary:S_GLOSSARY});
+
+/** Clean up a correction: unknown categories → "other", max 3 errors. */
+function normalizeCorrection(r){
+  r.errors = (r.errors||[]).slice(0,3).map(e => Object.assign(e, {category: normCat(e.category)}));
+  r.new_vocab = (r.new_vocab||[]).filter(v => v.de && v.en);
+  r.estimated_level = normLevel(r.estimated_level);
+  return r;
+}
+function normalizeQuestions(qs){
+  return (qs||[]).filter(q => Array.isArray(q.options) && q.options.length >= 2)
+    .map(q => Object.assign(q, {answer_index: Math.max(0, Math.min(q.options.length-1, Math.round(Number(q.answer_index)||0)))}));
+}
+
+/* =====================================================================
+   5. SPEECH: text-to-speech only (speak) – no recording
+   ===================================================================== */
+/* ---- Text-to-speech: the ONLY place that produces audio.
+        To switch to OpenAI TTS / ElevenLabs later, rewrite just speak() and stopSpeaking(). ---- */
+let germanVoice = null, speakToken = 0;
+function germanVoices(){ return ('speechSynthesis' in window) ? speechSynthesis.getVoices().filter(v => /^de/i.test(v.lang)) : []; }
+function loadVoice(){
+  const vs = germanVoices();
+  germanVoice = vs.find(v => v.voiceURI === settings.voiceURI) || vs.find(v => /de[-_]DE/i.test(v.lang)) || vs[0] || null;
+}
+if('speechSynthesis' in window){ loadVoice(); speechSynthesis.onvoiceschanged = loadVoice; }
+
+/** speak(text, options)
+ *  options.speed     'normal' | 'slow'
+ *  options.shadow    true → shadowing: after each sentence, pause ~1.5× as long as
+ *                    the sentence took, so you can repeat it, then continue.
+ *  options.onSentence(index, total, sentence)   a sentence starts playing
+ *  options.onPause(index, total, ms)            shadowing pause starts (your turn)
+ *  options.onEnd()                              everything finished */
+function speak(text, options = {}){
+  const {speed = 'normal', shadow = false, onEnd, onSentence, onPause} = options;
+  if(!('speechSynthesis' in window)){ toast('Text-to-speech is not supported here.'); return; }
+  stopSpeaking();
+  const my = ++speakToken;
+  const rate = speed === 'slow' ? 0.72 : shadow ? 0.85 : 0.95;
+  // Speak sentence by sentence (long utterances are unreliable on iOS).
+  const parts = (String(text).match(/[^.!?…\n]+[.!?…]*["»“”]?\s*/g) || [String(text)]).map(s => s.trim()).filter(Boolean);
+  let i = 0;
+  const next = () => {
+    if(my !== speakToken) return;
+    if(i >= parts.length){ onEnd && onEnd(); return; }
+    const idx = i, chunk = parts[i++];
+    const u = new SpeechSynthesisUtterance(chunk);
+    u.lang = germanVoice ? germanVoice.lang : 'de-DE';
+    if(germanVoice) u.voice = germanVoice;
+    u.rate = rate;
+    let startedAt = Date.now();
+    u.onstart = () => { startedAt = Date.now(); };
+    const done = () => {
+      if(my !== speakToken) return;
+      if(!shadow){ next(); return; }
+      // Pause 1.5× the sentence's real duration (fallback: estimate from its length)
+      let dur = Date.now() - startedAt;
+      if(dur < 300) dur = chunk.length * 70 / rate;
+      const pause = Math.round(Math.min(20000, Math.max(1200, dur * 1.5)));
+      onPause && onPause(idx, parts.length, pause);
+      setTimeout(next, pause);
+    };
+    u.onend = done; u.onerror = done;
+    onSentence && onSentence(idx, parts.length, chunk);
+    speechSynthesis.speak(u);
+  };
+  next();
+}
+function stopSpeaking(){ speakToken++; if('speechSynthesis' in window) speechSynthesis.cancel(); }
+
+// "Listen" buttons anywhere in the app: <button data-say="ID" data-speed="slow">
+const sayTexts = [];
+function sayButtons(text, label = 'Listen'){
+  const id = sayTexts.push(text) - 1;
+  return `<div class="say-group"><div class="row"><button class="btn secondary sm" data-say="${id}" data-speed="normal">🔊 ${label}</button>
+    <button class="btn secondary sm" data-say="${id}" data-speed="slow">🐢 Slow</button>
+    <button class="btn secondary sm" data-say="${id}" data-speed="shadow" title="Sentence by sentence with pauses to repeat">🗣 Shadow</button>
+    <button class="btn ghost sm" data-stop="1" style="flex:0 0 44px">⏹</button></div><div class="say-status"></div></div>`;
+}
+function clearSayStatus(){ $$('.say-status').forEach(s => s.innerHTML = ''); }
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-say]');
+  if(b){
+    clearSayStatus();
+    const text = sayTexts[+b.dataset.say];
+    if(b.dataset.speed !== 'shadow'){ speak(text, {speed:b.dataset.speed}); return; }
+    // Shadowing: show whose turn it is, with a shrinking bar during the pause
+    const status = b.closest('.say-group') && $('.say-status', b.closest('.say-group'));
+    const set = html => { if(status) status.innerHTML = html; };
+    speak(text, {shadow:true,
+      onSentence:(i, n) => set(`<p class="small">🔊 Listen… <span class="muted">(${i + 1}/${n})</span></p>`),
+      onPause:(i, n, ms) => set(`<p class="small"><b>🗣 Your turn – repeat!</b> <span class="muted">(${i + 1}/${n})</span></p>
+          <div class="bar"><span class="shrink" style="animation-duration:${ms}ms"></span></div>`),
+      onEnd:() => set('<p class="small">✓ Shadowing done – try it once more, or tap 🔊 to hear it in one go.</p>')});
+    return;
+  }
+  if(e.target.closest('[data-stop]')){ stopSpeaking(); clearSayStatus(); }
+});
+
+/* =====================================================================
+   6. DIFF (highlight corrections, computed locally)
+   ===================================================================== */
+/** Normalise one word for comparison: lowercase, no punctuation.
+ *  So "Hause." and "hause" count as the same word. */
+const DIFF_PUNCT = /[.,!?;:„"‚'“”‘’«»()\[\]…–—]/g;
+function normWord(w){ return String(w).toLowerCase().replace(DIFF_PUNCT, ''); }
+function lcsOps(A, B, eq){
+  const n = A.length, m = B.length, dp = Array.from({length:n+1}, () => new Array(m+1).fill(0));
+  for(let i = n-1; i >= 0; i--) for(let j = m-1; j >= 0; j--)
+    dp[i][j] = eq(A[i], B[j]) ? dp[i+1][j+1] + 1 : Math.max(dp[i+1][j], dp[i][j+1]);
+  const ops = []; let i = 0, j = 0;
+  while(i < n && j < m){
+    if(eq(A[i], B[j])){ ops.push({t:'same', w:B[j]}); i++; j++; }
+    else if(dp[i+1][j] >= dp[i][j+1]) ops.push({t:'del', w:A[i++]});
+    else ops.push({t:'ins', w:B[j++]});
+  }
+  while(i < n) ops.push({t:'del', w:A[i++]});
+  while(j < m) ops.push({t:'ins', w:B[j++]});
+  return {ops, lcs: dp[0][0]};
+}
+/** Split into words, dropping tokens that are only punctuation (e.g. a lone "–"). */
+function diffTokens(s){ return String(s).split(/\s+/).filter(w => w && normWord(w)); }
+
+/** Word-level diff as HTML, computed locally (no API call).
+ *  a = "before" (your text / what you said), b = "after" (corrected / target).
+ *  Words are compared after normWord(); they are DISPLAYED in their original
+ *  spelling and casing: unchanged words in b's form, removed words <del> (red,
+ *  struck through) in a's form, added/changed words <ins> (green) in b's form. */
+function diffHTML(a, b){
+  const {ops} = lcsOps(diffTokens(a), diffTokens(b), (x, y) => normWord(x) === normWord(y));
+  const out = []; let cur = null, buf = [];
+  const flush = () => {
+    if(!buf.length) return;
+    const t = esc(buf.join(' '));
+    out.push(cur === 'del' ? `<del>${t}</del>` : cur === 'ins' ? `<ins>${t}</ins>` : `<span class="same">${t}</span>`);
+    buf = [];
+  };
+  for(const o of ops){ if(o.t !== cur){ flush(); cur = o.t; } buf.push(o.w); }
+  flush();
+  return out.join(' ');
+}
+
+/* =====================================================================
+   6b. TAP-TO-GLOSS – words from Claude's glossary become tappable (no extra API call)
+   ===================================================================== */
+const glossStore = [];   // one lookup table per rendered text
+/* Austrian words → standard German. Matched with common endings (Sackerl, Sackerln, Erdäpfeln …).
+   Claude's glossary ("at" field) and the listening module's list add to this. */
+const AUSTRIAN = {
+  'jänner':'Januar', 'feber':'Februar', 'sackerl':'Tüte', 'erdäpfel':'Kartoffeln', 'erdapfel':'Kartoffel',
+  'paradeiser':'Tomaten', 'heuer':'dieses Jahr', 'topfen':'Quark', 'marille':'Aprikose', 'marillen':'Aprikosen',
+  'karfiol':'Blumenkohl', 'kren':'Meerrettich', 'schlagobers':'Schlagsahne', 'obers':'Sahne', 'semmel':'Brötchen',
+  'fisolen':'grüne Bohnen', 'kukuruz':'Mais', 'ribisel':'Johannisbeeren', 'zwetschke':'Pflaume', 'zwetschken':'Pflaumen',
+  'servus':'Hallo / Tschüss', 'grüß gott':'Guten Tag', 'gehsteig':'Bürgersteig', 'pickerl':'Aufkleber / Vignette',
+  'jause':'Zwischenmahlzeit / Brotzeit', 'palatschinke':'Pfannkuchen', 'palatschinken':'Pfannkuchen', 'faschiertes':'Hackfleisch',
+  'spital':'Krankenhaus', 'matura':'Abitur', 'trafik':'Kiosk', 'stiegenhaus':'Treppenhaus', 'beisl':'Kneipe',
+  'heurige':'Weinlokal / neuer Wein', 'heuriger':'Weinlokal / neuer Wein', 'heurigen':'Weinlokal / neuer Wein',
+  'ordination':'Arztpraxis', 'kassa':'Kasse', 'polster':'Kissen', 'häferl':'Tasse / Becher', 'bim':'Straßenbahn'
+};
+const AT_ENDINGS = ['', 'n', 's', 'e', 'en', 'er', 'ern', 'ln'];
+const AT_EXACT = new Set(['heuer', 'servus', 'bim', 'kren', 'obers', 'kassa']);   // never inflected → no ending matching ("heuern" = to hire)
+function austrianStandard(key, extra){
+  if(!key) return '';
+  if(extra && extra.has(key)) return extra.get(key);
+  if(AUSTRIAN[key]) return AUSTRIAN[key];
+  if(key.length < 4) return '';
+  for(const base in AUSTRIAN){
+    if(base.length >= 4 && !AT_EXACT.has(base) && key.startsWith(base) && AT_ENDINGS.includes(key.slice(base.length))) return AUSTRIAN[base];
+  }
+  return '';
+}
+function atBadge(word, standard){ return `<button class="at-badge" data-at="${esc(standard)}" data-atw="${esc(word)}" aria-label="Austrian word">AT</button>`; }
+
+/** Render German text with tappable glossed words (words without a glossary entry stay plain)
+ *  and an "AT" badge after Austrian words.
+ *  austrianList (optional): [{austrian, standard_de}] from the listening module. */
+function glossText(text, glossary, austrianList){
+  const lookup = new Map();
+  Object.entries(glossary || {}).forEach(([k, v]) => {
+    const key = diffTokens(k).map(normWord).join(' ');
+    if(key && v && v.base) lookup.set(key, Object.assign({form:k}, v));
+  });
+  const extraAT = new Map();
+  (austrianList || []).forEach(a => { const k = diffTokens(a.austrian).map(normWord).join(' '); if(k && a.standard_de) extraAT.set(k, a.standard_de); });
+  lookup.forEach((v, k) => { if(v.at) extraAT.set(k, v.at); });
+  const gid = glossStore.push(lookup) - 1;
+  const keyOf = ws => ws.map(normWord).filter(Boolean).join(' ');
+  const paragraphs = String(text || '').split(/\n+/).map(para => splitSentences(para).map(sentence => {
+    const words = sentence.split(/\s+/).filter(Boolean), out = [];
+    for(let i = 0; i < words.length;){
+      let n = 0, isGloss = false;
+      for(let k = Math.min(3, words.length - i); k >= 1 && !n; k--){        // longest glossary match first
+        if(lookup.has(keyOf(words.slice(i, i + k)))){ n = k; isGloss = true; }
+      }
+      if(!n && i + 1 < words.length && austrianStandard(keyOf(words.slice(i, i + 2)), extraAT)) n = 2;   // e.g. "Grüß Gott"
+      if(!n) n = 1;
+      const surface = words.slice(i, i + n).join(' '), key = keyOf(words.slice(i, i + n));
+      const at = austrianStandard(key, extraAT);
+      out.push((isGloss ? `<span class="w" data-k="${esc(key)}">${esc(surface)}</span>` : esc(surface)) + (at ? atBadge(stripPunct(surface), at) : ''));
+      i += n;
+    }
+    return `<span class="sent">${out.join(' ')}</span>`;
+  }).join(' '));
+  return `<span class="glossed" data-gid="${gid}">${paragraphs.join('<br><br>')}</span>`;
+}
+function closeGloss(){ $('#glossPop').classList.add('hidden'); $$('.w.active').forEach(w => w.classList.remove('active')); }
+function cardExists(de){ const k = String(de).trim().toLowerCase(); return P.flashcards.some(c => c.de.trim().toLowerCase() === k); }
+/** Show the pop-up for a glossary entry (or an Austrian word). */
+function showGloss(entry, sentence){
+  const pop = $('#glossPop');
+  const de = entry.article && !new RegExp('^(der|die|das)\\s', 'i').test(entry.base) ? `${entry.article} ${entry.base}` : entry.base;
+  const sayId = sayTexts.push(de) - 1;
+  pop.innerHTML = `<div class="kv"><span><b style="font-size:19px">${esc(entry.form)}</b>${normWord(entry.form) !== normWord(entry.base) ? ` <span class="muted">→ ${esc(de)}</span>` : ''}</span>
+      <button class="linkbtn" id="glossClose" aria-label="Close">✕</button></div>
+    ${entry.article || entry.plural ? `<p class="muted small">${entry.article ? esc(entry.article) : ''}${entry.article && entry.plural ? ' · ' : ''}${entry.plural ? 'Plural: ' + esc(entry.plural) : ''}</p>` : ''}
+    <p>${esc(entry.en)}</p>
+    ${entry.at ? `<p class="small"><span class="at-badge">AT</span> Austrian · standard German: <b>${esc(entry.at)}</b></p>` : ''}
+    <div class="row"><button class="btn secondary sm" data-say="${sayId}" data-speed="slow">🔊</button>
+      ${entry.noCard ? '' : cardExists(de) ? '<button class="btn sm" disabled>✓ In your flashcards</button>'
+        : '<button class="btn sm" id="glossAdd">➕ Add to flashcards</button>'}</div>`;
+  pop.classList.remove('hidden');
+  glossScrollY = window.scrollY; glossOpenedAt = Date.now();
+  $('#glossClose').onclick = closeGloss;
+  const add = $('#glossAdd');
+  if(add) add.onclick = () => {
+    addVocab([{de, en: entry.en, example_de: sentence || ''}]); saveProgress();
+    add.textContent = '✓ Added'; add.disabled = true; toast('Added to flashcards ✓');
+  };
+}
+document.addEventListener('click', e => {
+  const at = e.target.closest('[data-at]');
+  if(at){
+    showGloss({form:at.dataset.atw, base:at.dataset.atw, en:'Austrian German', at:at.dataset.at, noCard:true});
+    return;
+  }
+  const w = e.target.closest('.w');
+  if(w){
+    const lookup = glossStore[+w.closest('.glossed').dataset.gid], entry = lookup && lookup.get(w.dataset.k);
+    if(!entry) return;
+    $$('.w.active').forEach(x => x.classList.remove('active')); w.classList.add('active');
+    showGloss(entry, w.closest('.sent') ? w.closest('.sent').textContent : '');
+    return;
+  }
+  if(!e.target.closest('#glossPop') && !e.target.closest('[data-at]')) closeGloss();
+});
+// Close the pop-up when you scroll on, so it never sits on top of buttons
+let glossScrollY = 0, glossOpenedAt = 0;
+window.addEventListener('scroll', () => {
+  if($('#glossPop').classList.contains('hidden') || Date.now() - glossOpenedAt < 700) return;   // ignore scroll animations still running
+  if(Math.abs(window.scrollY - glossScrollY) > 80) closeGloss();
+}, {passive:true});
+
+/* =====================================================================
+   7. LEARNING DATA: error log, flashcards (SM-2), topics, levels
+   ===================================================================== */
+function nextTopic(){
+  P.topicCounter = (P.topicCounter || 0) + 1;
+  const group = TOPICS[P.topicCounter % TOPICS.length];
+  const [sub, icon] = pick(group.sub);
+  return {group: group.name, sub, icon};
+}
+function textLevel(skill){ return levelIdx(P.levels[skill]) >= 3 ? 'B2' : 'B1+ (between B1 and B2)'; }
+function targetLevel(skill){ return LEVELS[Math.min(3, levelIdx(P.levels[skill]) + 1)]; }
+
+/** Save errors, level evidence and new vocabulary from a correction. Returns number of new cards. */
+function logCorrection(skill, r){
+  const d = todayStr();
+  r.errors.forEach(e => P.errors.push({date:d, skill, category:e.category, wrong:e.wrong, right:e.right, explanation_en:e.explanation_en,
+    // the real corrected sentence the error came from → used for cloze drills
+    sentence: findSentence(r.corrected, e.right) || findSentence(r.natural_version, e.right)}));
+  if(r.estimated_level) P.evidence.push({date:d, skill, level:r.estimated_level});
+  const added = addVocab(r.new_vocab);
+  saveProgress();
+  return added;
+}
+function splitSentences(t){ return (String(t || '').match(/[^.!?\n]+[.!?…]*["“”»]?/g) || []).map(s => s.trim()).filter(Boolean); }
+/** The sentence of `text` that contains `phrase` (compared without case/punctuation). */
+function findSentence(text, phrase){
+  const p = diffTokens(phrase).map(normWord).join(' ');
+  if(!p) return '';
+  return splitSentences(text).find(s => (' ' + diffTokens(s).map(normWord).join(' ') + ' ').includes(' ' + p + ' ')) || '';
+}
+function topCategories(n = 5, days = 60){
+  const since = addDays(todayStr(), -days), counts = {};
+  P.errors.filter(e => e.date >= since && e.category !== 'other').forEach(e => counts[e.category] = (counts[e.category]||0) + 1);
+  return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, n);
+}
+
+function addVocab(list){
+  let added = 0;
+  (list || []).forEach(v => {
+    const key = String(v.de).trim().toLowerCase();
+    if(!key || P.flashcards.some(c => c.de.trim().toLowerCase() === key)) return;
+    P.flashcards.push({id:uid(), de:String(v.de).trim(), en:String(v.en).trim(), example_de:String(v.example_de||'').trim(),
+                       ef:2.5, reps:0, interval:0, due:todayStr(), added:todayStr()});
+    added++;
+  });
+  return added;
+}
+/** SM-2 style update. q: 1 = again, 3 = hard, 4 = good, 5 = easy */
+function reviewCard(card, q){
+  if(q < 3){ card.reps = 0; card.interval = 0; card.due = todayStr(); }
+  else{
+    card.reps += 1;
+    card.interval = card.reps === 1 ? 1 : card.reps === 2 ? (q === 5 ? 6 : 4) : Math.round(card.interval * card.ef * (q === 3 ? 0.8 : 1));
+    card.due = addDays(todayStr(), card.interval);
+  }
+  card.ef = Math.max(1.3, card.ef + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02)));
+}
+function dueCards(){ const t = todayStr(); return P.flashcards.filter(c => c.due <= t); }
+
+function writingRange(){
+  const base = {A1:[30,50], A2:[40,70], B1:[60,100], B2:[80,120], C1:[100,120]}[P.levels.writing] || [40,70];
+  const bump = Math.min(30, Math.floor((P.counts.readwrite || 0) / 4) * 5);   // slowly longer over time
+  return [Math.min(base[0] + bump, 110), Math.min(base[1] + bump, 120)];
+}
+
+/* =====================================================================
+   8. DAILY SESSION PLANNER
+   ===================================================================== */
+/** Split between skills. Starts at 30/30/20/20 and adapts as level estimates change:
+ *  a skill that improves faster than the others gets a smaller share. */
+function sessionWeights(){
+  // Default split: reading (+ short reply) 35 % · typed production 30 % · listening 15 % · review 20 %.
+  // It adapts: a skill that gets closer to B2 faster than the others gets a smaller share.
+  const start = P.startLevels || START_LEVELS;
+  const gap = (lv) => 3 - levelIdx(lv);                       // distance to B2
+  const factor = (now, st) => Math.max(0.4, 0.5 + 0.5 * (Math.max(0, now) / Math.max(0.5, st)));
+  let w = {
+    readwrite: 0.35 * factor(gap(P.levels.reading), gap(start.reading)),
+    produce:   0.30 * factor(gap(P.levels.writing), gap(start.writing)),
+    listening: 0.15 * factor(gap(P.levels.listening), gap(start.listening))
+  };
+  const sum = w.readwrite + w.produce + w.listening;
+  Object.keys(w).forEach(k => w[k] = 0.8 * w[k] / sum);
+  w.review = 0.2;
+  return w;
+}
+const TASK_INFO = {
+  readwrite:{icon:'📖', label:'Read + reply'}, produce:{icon:'✏️', label:'Produce: type your answer'},
+  listening:{icon:'🎧', label:'Listening'}, grammar:{icon:'🧩', label:'Grammar drills (your errors)'},
+  cards:{icon:'🃏', label:'Flashcards'}, cloze:{icon:'🔁', label:'Cloze: your own mistakes'}
+};
+function buildSession(total){
+  const w = sessionWeights(), tasks = [];
+  const add = (type, minutes) => tasks.push({id:uid(), type, minutes:Math.max(2, Math.round(minutes)), done:false});
+  const blocks = (type, minutes, each) => { const n = Math.max(1, Math.round(minutes / each)); for(let i = 0; i < n; i++) add(type, minutes / n); };
+  blocks('readwrite', total * w.readwrite, 12);   // reading text + questions + short reply
+  blocks('produce',   total * w.produce, 5);      // one situation per ~5 min
+  blocks('listening', total * w.listening, 6);
+  // Review: flashcards (if any are due) + cloze from your mistakes + grammar drills
+  let rv = total * w.review;
+  const due = dueCards().length;
+  if(due > 0){ const c = Math.min(rv / 2, 2 + due * 0.4); add('cards', c); rv -= c; }
+  if(rv >= 6 && clozeItems(3).length >= 3){ add('cloze', Math.min(4, rv / 2)); rv -= Math.min(4, rv / 2); }
+  if(rv >= 3 || !tasks.some(t => ['cards','cloze'].includes(t.type))) add('grammar', rv);
+  // Mix skills instead of doing all tasks of one kind in a row
+  const queues = ['readwrite','produce','listening'].map(k => tasks.filter(t => t.type === k));
+  const mixed = [];
+  while(queues.some(q => q.length)) queues.forEach(q => { if(q.length) mixed.push(q.shift()); });
+  return {date:todayStr(), length:total, tasks: mixed.concat(tasks.filter(t => ['cards','cloze','grammar'].includes(t.type)))};
+}
+function ensureTodaySession(){
+  if(!P.todaySession || P.todaySession.date !== todayStr()){
+    P.todaySession = buildSession(P.sessionLength); saveProgress();
+  }
+  return P.todaySession;
+}
+function markTaskDone(taskId){
+  const s = P.todaySession; if(!s) return;
+  const t = s.tasks.find(t => t.id === taskId); if(t) t.done = true;
+}
+
+/* ---------- activity tracking (minutes) ---------- */
+let activity = null;
+function beginActivity(kind, taskId){ activity = {kind, taskId, start:Date.now(), ready:false}; }
+function activityReady(){ if(activity) activity.ready = true; }     // called once feedback has been shown
+function completeActivity(){
+  if(!activity) return null;
+  const a = activity; activity = null;
+  const mins = Math.max(1, Math.min(30, Math.round((Date.now() - a.start) / 60000)));
+  addMinutes(mins);
+  P.counts[a.kind] = (P.counts[a.kind] || 0) + 1;
+  if(a.taskId) markTaskDone(a.taskId);
+  saveProgress();
+  return {mins, inSession: !!a.taskId};
+}
+/** "Done" buttons shown at the end of each exercise. */
+function doneButtonsHTML(againLabel){
+  const inSession = activity && activity.taskId;
+  return `<div class="card">
+    <button class="btn" data-finish="1">${inSession ? '✓ Done – next task' : '✓ Done'}</button>
+    ${againLabel ? `<button class="btn secondary" data-again="1">${esc(againLabel)}</button>` : ''}</div>`;
+}
+function bindDone(root, againFn){
+  const f = $('[data-finish]', root); if(f) f.onclick = () => { const r = completeActivity(); if(r) toast(`+${r.mins} min logged`); go(r && r.inSession ? 'today' : 'practice'); };
+  const a = $('[data-again]', root); if(a) a.onclick = () => { completeActivity(); againFn(); };
+}
+
+/* =====================================================================
+   9. ROUTER / NAVIGATION
+   ===================================================================== */
+const view = $('#view');
+let currentTab = 'today';
+function setTitle(t){ $('#pageTitle').textContent = t; }
+function go(tab){
+  stopSpeaking(); closeGloss(); glossStore.length = 0; clearInterval(warmTimer); warmTimer = null;
+  if(activity && activity.ready) completeActivity();     // feedback seen → count the minutes
+  else activity = null;
+  currentTab = tab;
+  $$('#tabbar button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  sayTexts.length = 0;
+  window.scrollTo(0, 0);
+  ({today:renderToday, practice:renderPractice, cards:renderCards, progress:renderProgress, settings:renderSettings})[tab]();
+}
+$$('#tabbar button').forEach(b => b.onclick = () => go(b.dataset.tab));
+/** Open an exercise screen (keeps the current tab highlighted). */
+function openScreen(title){ stopSpeaking(); clearInterval(warmTimer); warmTimer = null; closeGloss(); glossStore.length = 0; sayTexts.length = 0; window.scrollTo(0, 0); setTitle(title); }
+const STARTERS = {
+  produce: t => startProduce(t), readwrite: t => startReadWrite(t),
+  listening: t => startListening(t), grammar: t => startGrammar(t), cards: t => startCardReview(t),
+  cloze: t => startCloze(t)
+};
+
+/* =====================================================================
+   10. TODAY (guided daily session)
+   ===================================================================== */
+function weeklyCheckDue(){
+  const last = P.weeklyReports.length ? P.weeklyReports[P.weeklyReports.length - 1].date : P.createdAt;
+  return P.placementDone && daysBetween(last, todayStr()) >= 7 && P.evidence.some(e => e.date > last);
+}
+function exportReminderDue(){
+  if(!P.evidence.length && !P.flashcards.length) return false;
+  return P.lastExport ? daysBetween(P.lastExport, todayStr()) >= 7 : daysBetween(P.createdAt, todayStr()) >= 7;
+}
+
+function renderToday(){
+  setTitle('Today');
+  if(!settings.anthropicKey){
+    view.innerHTML = `<div class="card"><h2>Willkommen, Lirim! 👋</h2>
+      <p>To get started, add your Anthropic API key in <b>Settings</b> and tap <b>Test connection</b>.</p>
+      <p class="muted">On iPhone: do this inside the installed home-screen app – it has its own storage, separate from Safari.</p>
+      <button class="btn" id="toSettings">Open Settings</button></div>`;
+    $('#toSettings').onclick = () => go('settings'); return;
+  }
+  if(!P.placementDone){
+    view.innerHTML = `<div class="card"><h2>Placement check (≈10 min)</h2>
+      <p>A short check of reading, listening and writing to set your starting levels.</p>
+      <button class="btn" id="startPl">Start placement check</button>
+      <button class="btn ghost" id="skipPl">Skip – use my self-assessment (Reading B1, Writing A2, Listening B1)</button></div>`;
+    $('#startPl').onclick = startPlacement;
+    $('#skipPl').onclick = () => { P.placementDone = true; P.startLevels = Object.assign({}, P.levels); saveProgress(); renderToday(); };
+    return;
+  }
+  const s = ensureTodaySession();
+  const mins = minutesOn(todayStr()), pct = Math.min(100, Math.round(100 * mins / P.dailyGoal));
+  const anyDone = s.tasks.some(t => t.done), next = s.tasks.find(t => !t.done);
+  const w = sessionWeights();
+  view.innerHTML = `
+    ${exportReminderDue() ? `<div class="banner">💾 It's been a week since your last backup. Export your progress so it's safe.
+        <button class="btn sm secondary" id="expNow">Export now</button></div>` : ''}
+    ${weeklyCheckDue() ? `<div class="banner">📊 Your weekly level check is ready.
+        <button class="btn sm secondary" id="weeklyNow">Run weekly check</button></div>` : ''}
+    ${!anyDone && P.warmupDate !== todayStr() ? `<div class="card"><div class="kv"><h3 style="margin:0">⚡ Schnellrunde</h3><span class="pill">optional · 60 s</span></div>
+        <p class="muted small">Warm up with up to 10 rapid questions: articles, cases, word order.</p>
+        <div class="row"><button class="btn sm" id="warmGo">Start warm-up</button><button class="btn sm ghost" id="warmSkip">Skip today</button></div></div>` : ''}
+    <div class="card">
+      <div class="kv"><b>Daily goal</b><span>${mins} / ${P.dailyGoal} min</span></div>
+      <div class="bar"><span style="width:${pct}%"></span></div>
+      <p class="muted small">🔥 Streak: ${streak()} day(s) · a day counts with ≥ ${STREAK_MIN_MINUTES} min</p>
+    </div>
+    <div class="card">
+      <div class="kv"><h2 style="margin:0">Today's session</h2><span class="pill">${s.length} min</span></div>
+      <p class="muted small">Split: reading ${Math.round(w.readwrite*100)}% · typed production ${Math.round(w.produce*100)}% · listening ${Math.round(w.listening*100)}% · review ${Math.round(w.review*100)}%</p>
+      ${!anyDone ? `<div class="row"><button class="btn sm ${s.length===30?'':'ghost'}" data-len="30">30 min</button>
+        <button class="btn sm ${s.length===60?'':'ghost'}" data-len="60">60 min</button></div>` : ''}
+      <div style="margin-top:8px">${s.tasks.map(t => `
+        <div class="task ${t.done ? 'done' : ''}">
+          <div class="ico">${t.done ? '✅' : TASK_INFO[t.type].icon}</div>
+          <div class="info"><div>${TASK_INFO[t.type].label}</div><div class="muted small">~${t.minutes} min</div></div>
+          ${t.done ? '' : `<button class="btn sm ${t === next ? '' : 'secondary'}" data-start="${t.id}">Start</button>`}
+        </div>`).join('')}</div>
+      ${!next ? `<p style="margin-top:12px"><b>🎉 Session complete!</b> Great work today. You can keep practising in the Practice tab.</p>` : ''}
+    </div>
+  `;
+  $$('[data-len]', view).forEach(b => b.onclick = () => { P.sessionLength = +b.dataset.len; P.todaySession = buildSession(P.sessionLength); saveProgress(); renderToday(); });
+  $$('[data-start]', view).forEach(b => b.onclick = () => { const t = s.tasks.find(x => x.id === b.dataset.start); STARTERS[t.type](t.id); });
+  const e = $('#expNow'); if(e) e.onclick = () => { exportProgress(); renderToday(); };
+  const wg = $('#warmGo'); if(wg) wg.onclick = startWarmup;
+  const ws = $('#warmSkip'); if(ws) ws.onclick = () => { P.warmupDate = todayStr(); saveProgress(); renderToday(); };
+  const wk = $('#weeklyNow'); if(wk) wk.onclick = () => { go('progress'); runWeeklyCheck(); };
+}
+
+/* =====================================================================
+   11. PRACTICE MENU (free practice)
+   ===================================================================== */
+function renderPractice(){
+  setTitle('Practice');
+  const items = [
+    ['warmup','⚡','Schnellrunde','60-second warm-up: articles, cases, word order.'],
+    ['produce','✏️','Produce','Get a situation or question, type 1–5 sentences, get corrections and a more natural version to read aloud.'],
+    ['readwrite','📖','Read + reply','Short text, questions, then write a reply or opinion.'],
+    ['listening','🎧','Listening','Audio text with questions; transcript after answering.'],
+    ['cloze','🔁','Cloze drills','Fill the gap in real sentences from your own past mistakes.'],
+    ['grammar','🧩','Grammar drills','New targeted exercises for your most frequent error types.'],
+    ['cards','🃏','Flashcards','Review your vocabulary with spaced repetition.']
+  ];
+  view.innerHTML = items.map(([k, ic, t, d]) => `<div class="card"><h3>${ic} ${t}</h3><p class="muted">${d}</p>
+      <button class="btn sm" data-p="${k}">Start</button></div>`).join('') +
+    `<div class="card"><h3>📝 Placement check</h3><p class="muted">Redo the 10-minute check to reset your levels.</p>
+      <button class="btn sm ghost" id="redoPl">Start placement check</button></div>`;
+  $$('[data-p]', view).forEach(b => b.onclick = () => b.dataset.p === 'warmup' ? startWarmup() : STARTERS[b.dataset.p](null));
+  $('#redoPl').onclick = startPlacement;
+}
+
+/* =====================================================================
+   12. PRODUCE MODULE – typed answers to a situation or question
+   ===================================================================== */
+async function startProduce(taskId){
+  openScreen('Produce'); beginActivity('produce', taskId);
+  view.innerHTML = loadingHTML('Preparing a situation…');
+  const topic = nextTopic();
+  const asQuestion = (P.counts.produce || 0) % 3 === 2;      // every third one is a personal/opinion question
+  let sit;
+  try{
+    sit = await askJSON({schema:SCHEMA.situation, effort:'low', prompt:
+`Create one ${asQuestion ? 'personal or opinion question (as if a colleague or friend asks it)' : 'realistic everyday situation where the learner has to say or write something'} for the learner. Topic area: ${topic.group} – ${topic.sub}.
+The learner TYPES an answer of 1–5 sentences. Their writing level is ${P.levels.writing}; aim for an answer at about ${targetLevel('writing')}.
+JSON keys:
+{"title_en": short title, "situation_en": 1–3 sentences in English describing the situation and who they talk to,
+ "task_de": the situation's question or prompt in simple German (1–2 sentences, "Sie" or "du" as fits),
+ "useful_phrases": 4–5 useful German phrases for the answer, each {"de","en"}}`});
+  }catch(e){ view.innerHTML = errorHTML(e) + `<button class="btn" id="retry">Try again</button>`; $('#retry').onclick = () => startProduce(taskId); return; }
+
+  view.innerHTML = `
+    <div class="card">${topicRow(topic)}<h2 style="margin-top:8px">${esc(sit.title_en)}</h2>
+      <p>${esc(sit.situation_en)}</p><p class="de"><b>${glossText(sit.task_de, {})}</b></p>${sayButtons(sit.task_de)}
+      <details style="margin-top:10px"><summary>Useful phrases</summary><ul class="clean">
+        ${sit.useful_phrases.map(p => `<li><span class="de">${esc(p.de)}</span> <span class="muted">– ${esc(p.en)}</span></li>`).join('')}</ul></details>
+    </div>
+    <div class="card" id="answerCard"><h3>Your answer</h3>
+      <textarea id="pText" style="min-height:120px" placeholder="1–5 Sätze auf Deutsch…" autocapitalize="sentences"></textarea>
+      <p class="muted small" id="pCount">0 sentences · aim for 1–5</p>
+      <button class="btn" id="pSubmit">Check my answer</button></div>
+    <div id="fb"></div>`;
+  const ta = $('#pText');
+  ta.oninput = () => { const n = splitSentences(ta.value).length; $('#pCount').textContent = `${n} sentence${n === 1 ? '' : 's'} · aim for 1–5`; };
+  $('#pSubmit').onclick = async () => {
+    const text = ta.value.trim();
+    if(wordCount(text) < 3){ toast('Write at least one full sentence.'); return; }
+    if(splitSentences(text).length > 6){ toast('Keep it short: 1–5 sentences.'); return; }
+    $('#pSubmit').disabled = true;
+    const fb = $('#fb'); fb.innerHTML = loadingHTML('Checking your answer…');
+    try{
+      const r = normalizeCorrection(await askJSON({schema:SCHEMA.correction,
+        prompt:correctionPrompt('produce', text, `${sit.situation_en} Prompt: ${sit.task_de}`)}));
+      const added = logCorrection('writing', r);
+      $('#answerCard').classList.add('hidden');
+      fb.innerHTML = correctionHTML(r, 'produce', added) +
+        `<div class="card"><h3>🗣 Now read it aloud yourself</h3>
+          <p class="muted">Listen to the natural version above, then read it aloud. Tap <b>🗣 Shadow</b> to hear it sentence by sentence with a pause after each one to repeat.</p></div>` +
+        doneButtonsHTML('New situation');
+      activityReady(); bindDone(fb, () => startProduce(null));
+    }catch(e){ fb.innerHTML = errorHTML(e); $('#pSubmit').disabled = false; }
+  };
+}
+function correctionPrompt(kind, text, context){
+  const target = targetLevel('writing');
+  const src = kind === 'produce'
+    ? 'short typed answer (1–5 sentences, written quickly – like spontaneous speech; the learner may use occasional English words: give the German for them under word_choice)'
+    : 'written text';
+  return `Correct this ${src}.
+Situation / task: ${context}
+Learner's text:
+"""${text}"""
+Return JSON with exactly these keys:
+{"original": the learner's text unchanged,
+ "corrected": the same text with minimal corrections (keep the learner's ideas and structure),
+ "natural_version": how a fluent speaker would express the same ideas at about ${target} level – natural, not much longer,
+ "errors": the 2–3 MOST important errors only, each {"category": one of [${ERROR_CATEGORIES.join(', ')}], "wrong": the wrong phrase, "right": the correct phrase, "explanation_en": 1–2 short sentences in English},
+ "new_vocab": 2–4 useful words/phrases from the corrected or natural version that are probably new to the learner, each {"de": (nouns with article), "en", "example_de": one short example sentence},
+ "estimated_level": one of "A1","A2","B1","B2","C1" for this answer,
+ "comment_en": one honest, encouraging sentence${kind === 'writing' ? `,
+ "model_answer": a model answer to the same task, slightly above the learner's level (about ${target}),
+ "model_answer_glossary": ${glossSpec('model_answer')}` : ''}}`;
+}
+
+function correctionHTML(r, kind, added){
+  return `
+    <div class="card"><h3>Your ${kind === 'produce' ? 'answer' : 'text'}</h3><p class="de">${esc(r.original)}</p></div>
+    <div class="card"><h3>✅ Corrected</h3><p class="de diff">${diffHTML(r.original, r.corrected)}</p>
+      <p class="muted small diff"><del>red</del> = remove · <ins>green</ins> = add / change · plain = unchanged</p></div>
+    <div class="card"><h3>✨ More natural</h3><p class="de">${glossText(r.natural_version, {})}</p>${sayButtons(r.natural_version)}</div>
+    <div class="card"><h3>Top errors</h3>
+      ${r.errors.length ? r.errors.map(e => `<div class="err"><span class="pill">${esc(CATEGORY_LABELS[e.category])}</span>
+          <p class="de"><span class="wr">${esc(e.wrong)}</span> → <span class="rt">${esc(e.right)}</span></p>
+          <p class="muted">${esc(e.explanation_en)}</p></div>`).join('') : '<p>No important errors found. 👍</p>'}
+    </div>
+    ${r.model_answer ? `<div class="card"><h3>📝 Model answer</h3><p class="de">${glossText(r.model_answer, r.model_answer_glossary)}</p>
+      <p class="muted small">Tap a dotted word for its meaning.</p>${sayButtons(r.model_answer)}</div>` : ''}
+    ${r.new_vocab.length ? `<div class="card"><h3>New words ${added ? `<span class="pill good">+${added} flashcards</span>` : ''}</h3>
+      <ul class="clean">${r.new_vocab.map(v => `<li><b>${esc(v.de)}</b> – ${esc(v.en)}<br><span class="muted small">${esc(v.example_de)}</span></li>`).join('')}</ul></div>` : ''}
+    <div class="card">${r.estimated_level ? `<span class="pill">Estimated level: ${r.estimated_level}</span>` : ''}
+      ${r.comment_en ? `<p>${esc(r.comment_en)}</p>` : ''}</div>`;
+}
+
+/* =====================================================================
+   13. READING + WRITING MODULE
+   ===================================================================== */
+/** Multiple-choice questions widget. Calls onDone(correct, total) after the last one. */
+function mountQuestions(el, questions, onDone){
+  let answered = 0, correct = 0;
+  el.innerHTML = questions.map((q, qi) => `<div class="q" data-qi="${qi}"><p class="de"><b>${qi + 1}.</b> ${esc(q.question_de)}</p>
+      ${q.options.map((o, oi) => `<button class="opt" data-oi="${oi}">${esc(o)}</button>`).join('')}
+      <p class="muted small expl hidden"></p></div>`).join('');
+  $$('.q', el).forEach(div => {
+    const q = questions[+div.dataset.qi];
+    $$('.opt', div).forEach(btn => btn.onclick = () => {
+      if(div.dataset.done) return; div.dataset.done = '1';
+      const ok = +btn.dataset.oi === q.answer_index;
+      if(ok) correct++; answered++;
+      btn.classList.add(ok ? 'correct' : 'wrong');
+      $$('.opt', div)[q.answer_index].classList.add('correct');
+      const ex = $('.expl', div); ex.textContent = (ok ? '✓ ' : '✗ ') + q.explanation_en; ex.classList.remove('hidden');
+      if(answered === questions.length) onDone(correct, questions.length);
+    });
+  });
+}
+
+async function startReadWrite(taskId){
+  openScreen('Read + write'); beginActivity('readwrite', taskId);
+  view.innerHTML = loadingHTML('Writing a text for you…');
+  const topic = nextTopic();
+  const types = ['a Vienna news-style article','an email from a colleague or office at BOKU','a message from a landlord or property management',
+                 'a short opinion piece','an official notice or letter','a forum post'];
+  const type = topic.group === 'Work & lab' ? pick(['an email from a colleague or office at BOKU','an internal lab notice or announcement'])
+             : topic.group === 'News & society' ? pick(['a Vienna news-style article','a short opinion piece'])
+             : pick(types);
+  const [wMin, wMax] = writingRange();
+  let rd;
+  try{
+    rd = await askJSON({schema:SCHEMA.reading, prompt:
+`Write a reading text for the learner: ${type}, topic "${topic.sub}" (area: ${topic.group}).
+Level ${textLevel('reading')}, 80–200 words, natural and realistic (Vienna context).
+Then 3 multiple-choice comprehension questions in German (4 options each, one correct, test understanding not word-matching), and a writing task based on the text (a reply, message or short opinion of ${wMin}–${wMax} words).
+JSON keys: {"title", "text_type", "text_de", "glossary": ${glossSpec('text_de')},
+"questions": [{"question_de","options":[4 strings],"answer_index": 0-based number,"explanation_en": short}],
+"writing_task_en": the task in English incl. word range, "writing_task_de": the same task in simple German}`});
+  }catch(e){ view.innerHTML = errorHTML(e) + `<button class="btn" onclick="startReadWrite(null)">Try again</button>`; return; }
+  rd.questions = normalizeQuestions(rd.questions);
+
+  view.innerHTML = `
+    <div class="card">${topicRow(topic, rd.text_type)}<h2 style="margin-top:8px">${esc(rd.title)}</h2>
+      <p class="de">${glossText(rd.text_de, rd.glossary)}</p>
+      <p class="muted small">Tap a dotted word for its meaning.</p>${sayButtons(rd.text_de, 'Read aloud')}
+      <details style="margin-top:10px"><summary>Glossary</summary><ul class="clean">
+        ${Object.values(rd.glossary).map(g => `<li><b>${esc(g.base)}</b>${g.plural ? ` <span class="muted small">(${esc(g.plural)})</span>` : ''} – ${esc(g.en)}</li>`).join('')}</ul></details></div>
+    <div class="card"><h3>Questions</h3><div id="qs"></div><div id="qScore"></div></div>
+    <div class="card hidden" id="writeCard"><h3>✍️ Writing task</h3>
+      <p>${esc(rd.writing_task_en)}</p><p class="de muted">${esc(rd.writing_task_de)}</p>
+      <textarea id="wText" placeholder="Schreiben Sie hier…" autocapitalize="sentences"></textarea>
+      <p class="muted small" id="wCount">0 words · target ${wMin}–${wMax}</p>
+      <button class="btn" id="wSubmit">Get feedback</button></div>
+    <div id="fb"></div>`;
+  mountQuestions($('#qs'), rd.questions, (c, n) => {
+    P.evidence.push({date:todayStr(), skill:'reading', score:Math.round(100 * c / n), textLevel:textLevel('reading')}); saveProgress();
+    $('#qScore').innerHTML = `<p><span class="pill ${c === n ? 'good' : ''}">${c} / ${n} correct</span></p>`;
+    $('#writeCard').classList.remove('hidden');
+    $('#writeCard').scrollIntoView({behavior:'smooth'});
+  });
+  const ta = $('#wText');
+  ta.oninput = () => { const n = wordCount(ta.value); $('#wCount').textContent = `${n} words · target ${wMin}–${wMax}`; };
+  $('#wSubmit').onclick = async () => {
+    const text = ta.value.trim();
+    if(wordCount(text) < 8){ toast('Write a little more first (at least a few sentences).'); return; }
+    $('#wSubmit').disabled = true;
+    const fb = $('#fb'); fb.innerHTML = loadingHTML('Correcting your text…');
+    try{
+      const r = normalizeCorrection(await askJSON({schema:SCHEMA.writingCorrection,
+        prompt:correctionPrompt('writing', text, `Reading text: "${rd.text_de}"\nWriting task: ${rd.writing_task_en}`)}));
+      const added = logCorrection('writing', r);
+      $('#writeCard').classList.add('hidden');
+      fb.innerHTML = correctionHTML(r, 'writing', added) + doneButtonsHTML('Another text');
+      activityReady(); bindDone(fb, () => startReadWrite(null));
+    }catch(e){ fb.innerHTML = errorHTML(e); $('#wSubmit').disabled = false; }
+  };
+}
+
+/* =====================================================================
+   14. LISTENING MODULE
+   ===================================================================== */
+async function startListening(taskId){
+  openScreen('Listening'); beginActivity('listening', taskId);
+  view.innerHTML = loadingHTML('Preparing an audio text…');
+  const topic = nextTopic();
+  const withAustrian = (P.counts.listening || 0) % 2 === 0;   // every second text
+  const kind = pick(['a voicemail message','a radio news item','a short podcast excerpt (one speaker)','an announcement',
+                     'a colleague explaining something','a short personal story']);
+  let li;
+  try{
+    li = await askJSON({schema:SCHEMA.listening, prompt:
+`Write a listening script: ${kind}, topic "${topic.sub}" (area: ${topic.group}). ONE speaker only (it will be read by a single text-to-speech voice), no speaker labels.
+Level ${textLevel('listening')}, 90–170 words, natural spoken German.
+${withAustrian ? 'Include 1–2 typical Austrian expressions naturally (e.g. Jänner, Erdäpfel, Paradeiser, Grüß Gott, Servus, Sackerl, heuer, Topfen, Marille).' : 'Use standard German (no Austrian expressions needed; "austrian" may be an empty array).'}
+Then 3 multiple-choice questions in German (4 options, one correct).
+JSON keys: {"title", "script_de", "austrian": [{"austrian","standard_de","en"}] for each Austrian expression used,
+"glossary": ${glossSpec('script_de')},
+"questions": [{"question_de","options":[4],"answer_index": 0-based number,"explanation_en"}]}`});
+  }catch(e){ view.innerHTML = errorHTML(e) + `<button class="btn" onclick="startListening(null)">Try again</button>`; return; }
+  li.questions = normalizeQuestions(li.questions);
+  let plays = 0;
+  view.innerHTML = `
+    <div class="card">${topicRow(topic)}<h2 style="margin-top:8px">🎧 ${esc(li.title)}</h2>
+      <p class="muted">Listen (as often as you need), then answer. The transcript appears after you answer.</p>
+      <div class="row"><button class="btn" id="playN">▶️ Play</button><button class="btn secondary" id="playS">🐢 Slow</button>
+      <button class="btn ghost" id="stopP">⏹</button></div><p class="muted small" id="plays"></p></div>
+    <div class="card"><h3>Questions</h3><div id="qs"></div></div>
+    <div id="after"></div>`;
+  const play = speed => { plays++; $('#plays').textContent = `Played ${plays}×`; speak(li.script_de, {speed}); };
+  $('#playN').onclick = () => play('normal'); $('#playS').onclick = () => play('slow'); $('#stopP').onclick = stopSpeaking;
+  mountQuestions($('#qs'), li.questions, (c, n) => {
+    P.evidence.push({date:todayStr(), skill:'listening', score:Math.round(100 * c / n), textLevel:textLevel('listening'), plays}); saveProgress();
+    const after = $('#after');
+    after.innerHTML = `<div class="card"><p><span class="pill ${c === n ? 'good' : ''}">${c} / ${n} correct</span></p>
+        <h3>Transcript</h3><p class="de">${glossText(li.script_de, li.glossary, li.austrian)}</p>
+        <p class="muted small">Tap a dotted word for its meaning.</p>${sayButtons(li.script_de)}</div>
+      ${li.austrian.length ? `<div class="card"><h3>🇦🇹 Austrian expressions</h3>${li.austrian.map(a =>
+        `<p><b>${esc(a.austrian)}</b> = ${esc(a.standard_de)} <span class="muted">(${esc(a.en)})</span></p>`).join('')}</div>` : ''}
+      ${doneButtonsHTML('Another audio')}`;
+    activityReady(); bindDone(after, () => startListening(null));
+    after.scrollIntoView({behavior:'smooth'});
+  });
+}
+
+/* =====================================================================
+   15. GRAMMAR DRILLS (from the error log)
+   ===================================================================== */
+function answerMatches(given, expected){
+  const n = s => String(s).toLowerCase().replace(/[.,!?;:"„“”]/g, '').replace(/\s+/g, ' ').trim();
+  return String(expected).split('|').some(alt => n(alt) === n(given));
+}
+async function startGrammar(taskId){
+  openScreen('Grammar drills'); beginActivity('grammar', taskId);
+  view.innerHTML = loadingHTML('Creating exercises from your error log…');
+  let cats = topCategories(3).map(([c]) => c);
+  const fromLog = cats.length > 0;
+  if(!fromLog) cats = ['verb_position', 'subordinate_clause_verb_end', 'case_dative'];
+  const examples = P.errors.filter(e => cats.includes(e.category)).slice(-8).map(e => `${e.category}: "${e.wrong}" → "${e.right}"`).join('\n');
+  const topic = nextTopic();
+  let g;
+  try{
+    g = await askJSON({schema:SCHEMA.grammar, prompt:
+`Create 6 short grammar exercises targeting these error categories: ${cats.join(', ')} (2 per category).
+${examples ? 'The learner\'s real past errors:\n' + examples + '\n' : ''}Level about ${P.levels.writing}→${targetLevel('writing')}. Vocabulary from: ${topic.group}.
+Mix two types:
+- "gap": prompt_de is a sentence with ___ for the gap; "answer" is the exact missing word(s); list acceptable alternatives separated by "|".
+- "mc": prompt_de is a sentence or question; "options" is an array of 3 strings; "answer" is exactly the correct option text.
+JSON: {"exercises":[{"category","type":"gap" or "mc","instruction_en": short,"prompt_de","options": array or null,"answer","explanation_en": 1 short sentence}]}`});
+  }catch(e){ view.innerHTML = errorHTML(e) + `<button class="btn" onclick="startGrammar(null)">Try again</button>`; return; }
+  const ex = g.exercises.map(x => Object.assign(x, {category:normCat(x.category), isMC: Array.isArray(x.options) && x.options.length >= 2}));
+  let done = 0, right = 0;
+  view.innerHTML = `<div class="card"><h2>🧩 Targeted practice</h2><p class="muted">${fromLog ? 'Based on your most frequent errors:' : 'No error log yet – starting with common B1 problem areas:'}
+      ${cats.map(c => `<span class="pill">${esc(CATEGORY_LABELS[c])}</span>`).join(' ')}</p></div>
+    ${ex.map((x, i) => `<div class="card" data-ex="${i}"><span class="pill">${esc(CATEGORY_LABELS[x.category])}</span>
+      <p class="muted small" style="margin-top:6px">${esc(x.instruction_en)}</p><p class="de"><b>${esc(x.prompt_de)}</b></p>
+      ${x.isMC ? x.options.map(o => `<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join('')
+               : `<div class="row"><input type="text" autocapitalize="off" autocomplete="off" placeholder="Answer"><button class="btn sm" style="flex:0 0 auto;width:auto" data-check="1">Check</button></div>`}
+      <p class="small res"></p></div>`).join('')}
+    <div id="gEnd"></div>`;
+  const record = (i, ok, given) => {
+    const x = ex[i], card = $(`[data-ex="${i}"]`, view);
+    if(card.dataset.done) return; card.dataset.done = '1';
+    done++; if(ok) right++;
+    P.drills.push({date:todayStr(), category:x.category, correct:ok});
+    $('.res', card).innerHTML = (ok ? '<span class="pill good">✓ Richtig</span> ' : `<span class="pill bad">✗</span> Correct: <b>${esc(x.answer.split('|')[0])}</b> `) + `<span class="muted">${esc(x.explanation_en)}</span>`;
+    if(done === ex.length){
+      saveProgress();
+      $('#gEnd').innerHTML = `<div class="card"><h3>${right} / ${ex.length} correct</h3></div>` + doneButtonsHTML('More exercises');
+      activityReady(); bindDone($('#gEnd'), () => startGrammar(null));
+    }
+  };
+  ex.forEach((x, i) => {
+    const card = $(`[data-ex="${i}"]`, view);
+    if(x.isMC){
+      $$('.opt', card).forEach(b => b.onclick = () => {
+        if(card.dataset.done) return;
+        const ok = answerMatches(b.dataset.o, x.answer);
+        b.classList.add(ok ? 'correct' : 'wrong');
+        $$('.opt', card).forEach(o => { if(answerMatches(o.dataset.o, x.answer)) o.classList.add('correct'); });
+        record(i, ok);
+      });
+    }else{
+      const inp = $('input', card), check = () => { if(inp.value.trim()) record(i, answerMatches(inp.value, x.answer)); };
+      $('[data-check]', card).onclick = check;
+      inp.onkeydown = e => { if(e.key === 'Enter') check(); };
+    }
+  });
+}
+
+/* =====================================================================
+   15b. CLOZE DRILLS from real sentences in the error log (no API call)
+   ===================================================================== */
+const NOTHING = '— (no word)';
+const WORD_FAMILIES = [
+  ['der','die','das','dem','den','des'], ['ein','eine','einen','einem','einer','eines'],
+  ['kein','keine','keinen','keinem','keiner','keines'], ['mein','meine','meinen','meinem','meiner','meines'],
+  ['dein','deine','deinen','deinem','deiner','deines'], ['sein','seine','seinen','seinem','seiner','seines'],
+  ['ihr','ihre','ihren','ihrem','ihrer','ihres'], ['unser','unsere','unseren','unserem','unserer','unseres'],
+  ['dieser','diese','diesen','diesem','dieses'], ['ich','mich','mir'], ['du','dich','dir'], ['er','ihn','ihm'],
+  ['in','an','auf','bei','mit','nach','zu','von','für','über','um','aus','seit'],
+  ['weil','dass','obwohl','wenn','als','ob','damit','deshalb','trotzdem','denn','aber'],
+  ['im','am','beim','zum','zur','vom','ins']
+];
+const stripPunct = w => String(w).replace(/^[.,!?;:„"‚'“”‘’«»()]+|[.,!?;:„"‚'“”‘’«»()]+$/g, '');
+const keepCase = (model, w) => /^[A-ZÄÖÜ]/.test(model) ? w[0].toUpperCase() + w.slice(1) : w;
+
+/** Extra plausible wrong options for a one-word answer (other articles, endings, prepositions…). */
+function clozeVariants(answer, category){
+  const a = answer.toLowerCase();
+  if(answer.includes(' ') || answer === NOTHING) return [];
+  const fam = WORD_FAMILIES.find(f => f.includes(a));
+  if(fam) return fam.filter(w => w !== a).sort(() => Math.random() - .5).slice(0, 3).map(w => keepCase(answer, w));
+  const m = category === 'adjective_endings' && a.match(/^(.{3,}?)(e|en|er|es|em)$/);
+  if(m) return ['e','en','er','es','em'].filter(x => x !== m[2]).map(x => keepCase(answer, m[1] + x)).slice(0, 3);
+  return [];
+}
+
+/** Turn one logged error into a cloze item, or null if it can't be done cleanly. */
+function makeCloze(err){
+  if(!err.sentence || !err.right) return null;
+  const S = diffTokens(err.sentence), R = diffTokens(err.right), W = diffTokens(err.wrong || '');
+  const Sn = S.map(normWord), Rn = R.map(normWord);
+  // 1) find the corrected phrase inside the sentence
+  let pos = -1;
+  for(let i = 0; i + Rn.length <= Sn.length && pos < 0; i++) if(Rn.every((w, k) => Sn[i + k] === w)) pos = i;
+  if(pos < 0 || !R.length) return null;
+  // 2) What differs between "wrong" and "right"? Skip the words they share at the
+  //    start and at the end; the middle part is the error. This covers wrong words
+  //    (der → dem), missing words, extra words and word order (war kaputt → kaputt war).
+  const span = eq => {
+    let p = 0; while(p < R.length && p < W.length && eq(R[p], W[p])) p++;
+    let s = 0; while(s < R.length - p && s < W.length - p && eq(R[R.length - 1 - s], W[W.length - 1 - s])) s++;
+    return {p, rEnd: R.length - s, wEnd: W.length - s};
+  };
+  let sp = span((x, y) => normWord(x) === normWord(y));
+  let caseOnly = false;
+  if(sp.p === sp.rEnd && sp.p === sp.wEnd){                 // only capitalisation differs ("hause" → "Hause")
+    sp = span((x, y) => stripPunct(x) === stripPunct(y)); caseOnly = true;
+    if(sp.p === sp.rEnd && sp.p === sp.wEnd) return null;    // no real difference
+  }
+  if(sp.rEnd - sp.p > 4 || sp.wEnd - sp.p > 4) return null; // keep blanks short (max 4 words)
+  const start = pos + sp.p, end = pos + sp.rEnd - 1;        // end < start → the gap is "no word"
+  const answer = end >= start ? S.slice(start, end + 1).map(stripPunct).join(' ') : NOTHING;
+  const wrongOpt = W.slice(sp.p, sp.wEnd).map(stripPunct).join(' ') || NOTHING;
+  if(wrongOpt === answer) return null;
+  // sentence parts around the blank (punctuation stuck to the blanked word stays visible)
+  const lastTok = end >= start ? S[end] : '';
+  const trail = lastTok ? lastTok.slice(stripPunct(lastTok).length + lastTok.indexOf(stripPunct(lastTok))) : '';
+  const lead = end >= start ? S[start].slice(0, S[start].indexOf(stripPunct(S[start]))) : '';
+  const opts = [answer, wrongOpt, ...(caseOnly ? [] : clozeVariants(answer, err.category))];
+  const seen = new Set(), options = [];
+  for(const o of opts){ const k = caseOnly ? o : o.toLowerCase(); if(!seen.has(k) && options.length < 4){ seen.add(k); options.push(o); } }
+  if(options.length < 2) return null;
+  return {
+    before: S.slice(0, start).join(' ') + (lead ? ' ' + lead : ''), after: trail + ' ' + S.slice(Math.max(end + 1, start)).join(' '),
+    answer, wrongOpt, options: options.sort(() => Math.random() - .5), category: err.category,
+    hint: String(err.explanation_en || '').split(/(?<=[.!?])\s/)[0], caseOnly
+  };
+}
+
+/** Up to n cloze items: unique sentences, most frequent error categories first, recent first. */
+function clozeItems(n = 8){
+  const top = topCategories(5).map(([c]) => c), seen = new Set(), items = [];
+  for(const e of P.errors.slice().reverse()){
+    const key = (e.sentence || '') + '|' + e.right;
+    if(seen.has(key)) continue; seen.add(key);
+    const c = makeCloze(e); if(c) items.push(c);
+    if(items.length >= 40) break;
+  }
+  items.sort((a, b) => (top.indexOf(a.category) + 1 || 99) - (top.indexOf(b.category) + 1 || 99) + (Math.random() - .5) * 2);
+  return items.slice(0, n);
+}
+
+function startCloze(taskId){
+  openScreen('Cloze drills'); beginActivity('cloze', taskId);
+  const items = clozeItems(8);
+  if(items.length < 2){
+    view.innerHTML = `<div class="card"><h2>🔁 Cloze drills</h2><p>These drills use real sentences from your own mistakes.
+      Do a few Produce or writing tasks first – then they'll appear here.</p></div>` + doneButtonsHTML('');
+    activity = null; bindDone(view); return;
+  }
+  let i = 0, right = 0;
+  const show = () => {
+    if(i >= items.length){
+      saveProgress();
+      view.innerHTML = `<div class="card"><h2>${right} / ${items.length} correct</h2>
+        <p class="muted">Mistakes you get right here are mistakes you'll stop making when you speak.</p></div>` + doneButtonsHTML('Another round');
+      activityReady(); bindDone(view, () => startCloze(null)); return;
+    }
+    const it = items[i], typing = P.clozeMode === 'type';
+    view.innerHTML = `
+      <div class="row" style="margin-bottom:10px"><button class="btn sm ${typing ? 'ghost' : ''}" data-mode="choose">Choices</button>
+        <button class="btn sm ${typing ? '' : 'ghost'}" data-mode="type">Typing</button></div>
+      <div class="card"><div class="kv"><span class="pill">${esc(CATEGORY_LABELS[it.category] || it.category)}</span><span class="muted small">${i + 1} / ${items.length}</span></div>
+        <p class="de" style="font-size:19px;margin-top:12px">${esc(it.before)} <span class="blank" id="blank">_____</span>${esc(it.after)}</p>
+        <p class="muted small">From one of your own answers. Fill the gap.</p>
+        ${typing ? `<div class="row"><input id="clozeIn" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="Type the missing word(s) – leave empty if no word">
+                   <button class="btn sm" style="flex:0 0 auto;width:auto" id="clozeCheck">Check</button></div>`
+                 : it.options.map(o => `<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join('')}
+        <div id="clozeRes"></div></div>`;
+    $$('[data-mode]', view).forEach(b => b.onclick = () => { P.clozeMode = b.dataset.mode; saveProgress(); show(); });
+    const answer = given => {
+      if(view.dataset.answered === String(i)) return; view.dataset.answered = String(i);
+      const g = given === NOTHING ? '' : given, a = it.answer === NOTHING ? '' : it.answer;
+      const ok = it.caseOnly ? stripPunct(g.trim()) === a : normWord(g.trim()) === normWord(a);
+      if(ok) right++;
+      P.drills.push({date:todayStr(), category:it.category, correct:ok, source:'cloze'});
+      $('#blank').innerHTML = `<ins>${esc(it.answer)}</ins>`;
+      $$('.opt', view).forEach(o => { if(o.dataset.o === it.answer) o.classList.add('correct'); else if(o.dataset.o === given) o.classList.add('wrong'); });
+      $('#clozeRes').innerHTML = (ok ? '<p><span class="pill good">✓ Richtig</span></p>'
+        : `<p><span class="pill bad">✗</span> Correct: <b>${esc(it.answer)}</b> <span class="muted">(you once wrote: ${esc(it.wrongOpt)})</span></p>
+           ${it.hint ? `<p class="small">💡 <b>Rule:</b> ${esc(it.hint)}</p>` : ''}`) +
+        `<button class="btn" id="clozeNext">${i + 1 < items.length ? 'Next →' : 'Finish'}</button>`;
+      $('#clozeNext').onclick = () => { i++; show(); };
+    };
+    if(typing){
+      const inp = $('#clozeIn'); inp.focus();
+      $('#clozeCheck').onclick = () => answer(inp.value);
+      inp.onkeydown = e => { if(e.key === 'Enter') answer(inp.value); };
+    }else $$('.opt', view).forEach(b => b.onclick = () => answer(b.dataset.o));
+  };
+  show();
+}
+
+/* =====================================================================
+   15c. SCHNELLRUNDE – optional 60-second warm-up (local, no API call)
+   ===================================================================== */
+const WARM_NOUNS = [['Labor','das'],['Probe','die'],['Pilz','der'],['Mikroskop','das'],['Ergebnis','das'],['Besprechung','die'],
+  ['Wohnung','die'],['Miete','die'],['Vermieter','der'],['Termin','der'],['Formular','das'],['Fahrrad','das'],['Straßenbahn','die'],
+  ['Gerät','das'],['Versuch','der'],['Messung','die'],['Zentrifuge','die'],['Nährboden','der'],['Kühlschrank','der'],['Rechnung','die'],
+  ['Schlüssel','der'],['Heizung','die'],['Fenster','das'],['Zeitung','die'],['Umwelt','die'],['Brutschrank','der'],['Handschuh','der'],
+  ['Pipette','die'],['Kultur','die'],['Gehalt','das'],['Urlaub','der'],['Antrag','der'],['Bescheid','der'],['Kündigung','die']];
+const WARM_CASES = [ // [sentence, options, answer, hint]
+  ['Ich fahre mit ___ Fahrrad.', ['dem','das','den'], 'dem', 'mit + dative'],
+  ['Wir gehen in ___ Labor. (wohin?)', ['das','dem','der'], 'das', 'in + accusative for direction (wohin?)'],
+  ['Die Probe liegt in ___ Kühlschrank. (wo?)', ['dem','den','der'], 'dem', 'in + dative for location (wo?)'],
+  ['Ich warte auf ___ Ergebnis.', ['das','dem','des'], 'das', 'warten auf + accusative'],
+  ['Das Buch gehört ___ Kollegin.', ['der','die','den'], 'der', 'gehören + dative'],
+  ['Ich helfe ___ Kollegen.', ['dem','den','der'], 'dem', 'helfen + dative'],
+  ['Ohne ___ Schlüssel komme ich nicht rein.', ['den','dem','der'], 'den', 'ohne + accusative'],
+  ['Nach ___ Besprechung schreibe ich eine Mail.', ['der','die','dem'], 'der', 'nach + dative (die → der)'],
+  ['Ich brauche ___ neuen Termin.', ['einen','einem','ein'], 'einen', 'brauchen + accusative, masculine → einen'],
+  ['Ich stelle die Platte auf ___ Tisch. (wohin?)', ['den','dem','der'], 'den', 'auf + accusative for direction'],
+  ['Die Platte steht auf ___ Tisch. (wo?)', ['dem','den','der'], 'dem', 'auf + dative for location'],
+  ['Ich gebe ___ Vermieter die Miete.', ['dem','den','der'], 'dem', 'the receiver is dative'],
+  ['Für ___ Experiment brauchen wir mehr Zeit.', ['das','dem','des'], 'das', 'für + accusative'],
+  ['Seit ___ Woche arbeite ich hier.', ['einer','eine','einem'], 'einer', 'seit + dative'],
+  ['Ich frage ___ Chefin.', ['die','der','den'], 'die', 'fragen + accusative']
+];
+const WARM_ORDER = [ // [[option A, option B], index of correct, hint]
+  [['Heute ich arbeite im Labor.','Heute arbeite ich im Labor.'], 1, 'The verb is always in position 2.'],
+  [['Ich komme später, weil der Bus hat Verspätung.','Ich komme später, weil der Bus Verspätung hat.'], 1, 'weil sends the verb to the end.'],
+  [['Ich rufe morgen den Vermieter an.','Ich anrufe morgen den Vermieter.'], 0, 'Separable verb: the prefix goes to the end.'],
+  [['Ich weiß, dass das Ergebnis ist gut.','Ich weiß, dass das Ergebnis gut ist.'], 1, 'dass sends the verb to the end.'],
+  [['Morgen ich muss früh aufstehen.','Morgen muss ich früh aufstehen.'], 1, 'Modal verb in position 2, infinitive at the end.'],
+  [['Ich habe gestern die Proben gemessen.','Ich habe gemessen gestern die Proben.'], 0, 'The participle goes to the end.'],
+  [['Wenn ich Zeit habe, ich fahre Rad.','Wenn ich Zeit habe, fahre ich Rad.'], 1, 'After a subordinate clause, the verb comes first.'],
+  [['Kannst du mir morgen helfen?','Kannst du helfen mir morgen?'], 0, 'The infinitive goes to the end.'],
+  [['Obwohl es regnet, fahre ich mit dem Rad.','Obwohl es regnet, ich fahre mit dem Rad.'], 0, 'After a subordinate clause, the verb comes first.'],
+  [['Ich glaube, dass ich morgen kommen kann.','Ich glaube, dass ich kann morgen kommen.'], 0, 'In a dass-clause the conjugated verb is last.']
+];
+const shuffle = a => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(p => p[1]);
+function warmupItems(){
+  // nouns from your own flashcards ("der Brutschrank") are mixed into the article questions
+  const mine = P.flashcards.map(c => c.de.match(/^(der|die|das)\s+([A-ZÄÖÜ][^\s,;(]+)$/)).filter(Boolean).map(m => [m[2], m[1]]);
+  const nouns = shuffle(mine).slice(0, 2).concat(shuffle(WARM_NOUNS)).slice(0, 4);
+  const items = [
+    ...nouns.map(([n, art]) => ({kind:'Artikel', q:`___ ${n}`, options:['der','die','das'], answer:art, hint:'Always learn nouns together with their article.'})),
+    ...shuffle(WARM_CASES).slice(0, 3).map(([q, o, a, h]) => ({kind:'Kasus', q, options:shuffle(o), answer:a, hint:h})),
+    ...shuffle(WARM_ORDER).slice(0, 3).map(([o, i, h]) => ({kind:'Wortstellung', q:'Which sentence is correct?', options:shuffle(o), answer:o[i], hint:h}))
+  ];
+  return shuffle(items);
+}
+let warmTimer = null;
+function startWarmup(){
+  openScreen('Schnellrunde'); beginActivity('warmup', null);
+  P.warmupDate = todayStr(); saveProgress();
+  const items = warmupItems(), SECONDS = 60, results = [];
+  let i = 0, locked = false;
+  const started = Date.now();
+  view.innerHTML = `<div class="card"><div class="kv"><b>⚡ Schnellrunde</b><span class="muted small" id="wLeft">60 s</span></div>
+      <div class="bar" style="height:10px"><span id="wBar" style="width:100%;background:var(--good)"></span></div></div>
+    <div class="card" id="wCard"></div>`;
+  const finish = () => {
+    clearInterval(warmTimer); warmTimer = null;
+    const right = results.filter(r => r.ok).length;
+    (P.warmups = P.warmups || []).push({date:todayStr(), right, total:results.length});
+    saveProgress();
+    const wrong = results.filter(r => !r.ok);
+    view.innerHTML = `<div class="card"><h2>⚡ ${right} / ${results.length} richtig</h2>
+        <p class="muted">${results.length < items.length ? `Time's up after ${results.length} of ${items.length}.` : `All ${items.length} done in ${Math.round((Date.now() - started) / 1000)} s.`}</p>
+        ${wrong.length ? `<h3>Review</h3>${wrong.map(r => `<div class="err">
+            <p class="de">${r.item.kind === 'Wortstellung' ? `<span class="rt">${esc(r.item.answer)}</span>`
+              : esc(r.item.q.split('___')[0]) + `<span class="rt">${esc(r.item.answer)}</span>` + esc(r.item.q.split('___')[1] || '')}</p>
+            <p class="small muted">💡 ${esc(r.item.hint)}</p></div>`).join('')}` : results.length === items.length ? '<p>Perfekt! 🎉</p>' : ''}
+      </div>` + doneButtonsHTML('Another round');
+    activityReady(); bindDone(view, startWarmup);
+    // after a warm-up, "Done" goes back to today's plan
+    const f = $('[data-finish]', view); f.textContent = '✓ Done – start my session';
+    f.onclick = () => { completeActivity(); go('today'); };
+  };
+  const show = () => {
+    if(i >= items.length){ finish(); return; }
+    const it = items[i]; locked = false;
+    $('#wCard').innerHTML = `<div class="kv"><span class="pill">${it.kind}</span><span class="muted small">${i + 1} / ${items.length}</span></div>
+      <p class="de" style="font-size:20px;margin:14px 0 6px"><b>${esc(it.q)}</b></p>
+      ${it.options.map(o => `<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join('')}`;
+    $$('#wCard .opt').forEach(b => b.onclick = () => {
+      if(locked) return; locked = true;
+      const ok = b.dataset.o === it.answer;
+      results.push({item:it, ok});
+      b.classList.add(ok ? 'correct' : 'wrong');
+      if(!ok) $$('#wCard .opt').forEach(o => { if(o.dataset.o === it.answer) o.classList.add('correct'); });
+      setTimeout(() => { if(warmTimer){ i++; show(); } }, ok ? 350 : 1100);
+    });
+  };
+  warmTimer = setInterval(() => {
+    const left = Math.max(0, SECONDS - (Date.now() - started) / 1000);
+    const bar = $('#wBar'); if(!bar){ clearInterval(warmTimer); warmTimer = null; return; }
+    bar.style.width = (100 * left / SECONDS) + '%';
+    if(left < 15) bar.style.background = 'var(--bad)';
+    $('#wLeft').textContent = Math.ceil(left) + ' s';
+    if(left <= 0) finish();
+  }, 200);
+  show();
+}
+
+/* =====================================================================
+   16. FLASHCARDS (spaced repetition)
+   ===================================================================== */
+function renderCards(){
+  setTitle('Flashcards');
+  const due = dueCards().length;
+  view.innerHTML = `
+    <div class="stats"><div><b>${P.flashcards.length}</b><span class="muted small">cards</span></div>
+      <div><b>${due}</b><span class="muted small">due today</span></div>
+      <div><b>${P.flashcards.filter(c => c.interval >= 21).length}</b><span class="muted small">learned</span></div></div>
+    <div class="card" style="margin-top:14px"><button class="btn" id="rev" ${due ? '' : 'disabled'}>${due ? `Review ${Math.min(due, 25)} card(s)` : 'Nothing due – well done!'}</button>
+      <p class="muted small">New words from your Produce and writing feedback are added automatically.</p></div>
+    <div class="card"><h3>Add a card</h3>
+      <input id="nDe" placeholder="Deutsch (e.g. der Nährboden)"><div style="height:6px"></div>
+      <input id="nEn" placeholder="English"><div style="height:6px"></div>
+      <input id="nEx" placeholder="Example sentence (optional)">
+      <button class="btn sm secondary" id="addCard">Add</button></div>
+    <div class="card"><details><summary>All cards (${P.flashcards.length})</summary>
+      ${P.flashcards.slice().reverse().map(c => `<div class="kv" style="border-bottom:1px solid var(--line)">
+        <span><b>${esc(c.de)}</b> – ${esc(c.en)}<br><span class="muted small">due ${c.due}</span></span>
+        <button class="linkbtn" data-del="${c.id}">🗑</button></div>`).join('') || '<p class="muted">No cards yet.</p>'}
+    </details></div>`;
+  $('#rev').onclick = () => startCardReview(null);
+  $('#addCard').onclick = () => {
+    const de = $('#nDe').value.trim(), en = $('#nEn').value.trim();
+    if(!de || !en){ toast('Please fill in German and English.'); return; }
+    const n = addVocab([{de, en, example_de:$('#nEx').value.trim()}]); saveProgress();
+    toast(n ? 'Card added ✓' : 'That card already exists.'); renderCards();
+  };
+  $$('[data-del]', view).forEach(b => b.onclick = () => {
+    if(!confirm('Delete this card?')) return;
+    P.flashcards = P.flashcards.filter(c => c.id !== b.dataset.del); saveProgress(); renderCards();
+  });
+}
+function startCardReview(taskId){
+  openScreen('Flashcards'); beginActivity('cards', taskId);
+  const queue = dueCards().sort(() => Math.random() - 0.5).slice(0, 25);
+  if(!queue.length){
+    view.innerHTML = `<div class="card"><p>No cards are due right now. 🎉</p></div>` + doneButtonsHTML('');
+    activityReady(); bindDone(view); return;
+  }
+  let reviewed = 0;
+  const show = () => {
+    sayTexts.length = 0;
+    if(!queue.length){
+      view.innerHTML = `<div class="card"><h2>Fertig! ✓</h2><p>You reviewed ${reviewed} card(s).</p></div>` + doneButtonsHTML('');
+      activityReady(); bindDone(view); return;
+    }
+    const c = queue[0], deFirst = Math.random() < 0.5;
+    view.innerHTML = `<p class="muted small">${queue.length} left</p>
+      <div class="card flash"><div class="front">${esc(deFirst ? c.de : c.en)}</div>
+        <p class="muted small">${deFirst ? 'What does it mean?' : 'Say it in German'}</p>
+        <div id="back" class="hidden"><hr style="border:0;border-top:1px solid var(--line)">
+          <div class="front" style="font-size:20px">${esc(deFirst ? c.en : c.de)}</div>
+          ${c.example_de ? `<p class="de">${esc(c.example_de)}</p>` : ''}
+          ${sayButtons(c.de + (c.example_de ? '. ' + c.example_de : ''))}</div></div>
+      <button class="btn" id="showBack">Show answer</button>
+      <div class="row hidden" id="grades">
+        <button class="btn danger sm" data-q="1">Again</button><button class="btn secondary sm" data-q="3">Hard</button>
+        <button class="btn sm" data-q="4">Good</button><button class="btn secondary sm" data-q="5">Easy</button></div>`;
+    $('#showBack').onclick = () => { $('#back').classList.remove('hidden'); $('#showBack').classList.add('hidden'); $('#grades').classList.remove('hidden'); if(deFirst) speak(c.de); };
+    $$('[data-q]', view).forEach(b => b.onclick = () => {
+      const q = +b.dataset.q; reviewCard(c, q); queue.shift(); reviewed++;
+      if(q < 3) queue.push(c);          // "Again": see it once more in this round
+      saveProgress(); show();
+    });
+  };
+  show();
+}
+
+/* =====================================================================
+   17. PLACEMENT CHECK (first launch, ~10 min)
+   ===================================================================== */
+async function startPlacement(){
+  openScreen('Placement check'); activity = null;
+  const pl = {readingScore:0, listeningScore:0, writing:'', produce:''};
+  view.innerHTML = loadingHTML('Preparing your placement check…');
+  let c;
+  try{
+    c = await askJSON({schema:SCHEMA.placementContent, prompt:
+`Create placement-test material (to find the learner's level between A2 and B2).
+"reading": a text of ~150 words at B1 level about life/work in Vienna, with 4 multiple-choice questions in German (4 options): 2 easier (A2/B1) and 2 harder (B1+/B2, inference).
+"listening": a one-speaker monologue script of ~110 words at B1 level (it will be read by text-to-speech), with 3 multiple-choice questions in German (4 options), increasing difficulty.
+JSON: {"reading":{"text_de","questions":[{"question_de","options":[4],"answer_index": 0-based number,"explanation_en"}]},
+"listening":{"script_de","questions":[same]}}`});
+  }catch(e){ view.innerHTML = errorHTML(e) + `<button class="btn" onclick="startPlacement()">Try again</button>`; return; }
+  c.reading.questions = normalizeQuestions(c.reading.questions);
+  c.listening.questions = normalizeQuestions(c.listening.questions);
+
+  const step = (n, html) => { sayTexts.length = 0; window.scrollTo(0, 0); view.innerHTML = `<p class="muted small">Step ${n} of 4</p>` + html; };
+
+  // 1 – Reading
+  step(1, `<div class="card"><h2>📖 Reading</h2><p class="de">${esc(c.reading.text_de)}</p></div>
+    <div class="card"><div id="qs"></div></div><div id="nx"></div>`);
+  mountQuestions($('#qs'), c.reading.questions, (k, n) => {
+    pl.readingScore = Math.round(100 * k / n);
+    $('#nx').innerHTML = `<button class="btn">Next: Listening →</button>`; $('#nx button').onclick = listening;
+  });
+  // 2 – Listening
+  function listening(){
+    step(2, `<div class="card"><h2>🎧 Listening</h2><p class="muted">Play the audio at normal speed (up to 2 times), then answer.</p>
+      <button class="btn" id="pl">▶️ Play</button></div><div class="card"><div id="qs"></div></div><div id="nx"></div>`);
+    let n = 0; $('#pl').onclick = () => { if(n >= 2){ toast('Maximum 2 plays in the placement check.'); return; } n++; speak(c.listening.script_de); };
+    mountQuestions($('#qs'), c.listening.questions, (k, t) => {
+      pl.listeningScore = Math.round(100 * k / t);
+      $('#nx').innerHTML = `<div class="card"><h3>Transcript</h3><p class="de">${esc(c.listening.script_de)}</p></div><button class="btn">Next: Writing →</button>`;
+      $('#nx button').onclick = writing;
+    });
+  }
+  // 3 – Writing
+  function writing(){
+    step(3, `<div class="card"><h2>✍️ Writing</h2><p>Write 40–80 words: introduce yourself, describe your job at BOKU and say what you like or dislike about living in Vienna.</p>
+      <textarea id="pw" placeholder="Schreiben Sie hier…"></textarea><p class="muted small" id="pc">0 words</p>
+      <button class="btn" id="pn">Next: Quick answer →</button></div>`);
+    $('#pw').oninput = () => $('#pc').textContent = wordCount($('#pw').value) + ' words';
+    $('#pn').onclick = () => { pl.writing = $('#pw').value.trim(); if(wordCount(pl.writing) < 10){ toast('Please write at least a few sentences.'); return; } produce(); };
+  }
+  // 4 – Quick typed answer (spontaneous production, ~2 minutes, no dictionary)
+  function produce(){
+    step(4, `<div class="card"><h2>✏️ Quick answer</h2><p>Answer quickly in 2–5 sentences, without a dictionary – like you would say it:</p>
+      <p class="de"><b>Ein neuer Kollege fragt: „Wie sieht ein typischer Arbeitstag bei dir aus, und was ist schwierig?“</b></p>
+      <textarea id="pp" style="min-height:110px" placeholder="Antworten Sie hier…"></textarea>
+      <button class="btn" id="pdone">Finish & see my levels</button></div>`);
+    $('#pdone').onclick = () => { pl.produce = $('#pp').value.trim(); if(wordCount(pl.produce) < 6){ toast('Please write at least two sentences.'); return; } evaluate(); };
+  }
+  // Evaluation by Claude
+  async function evaluate(){
+    view.innerHTML = loadingHTML('Estimating your levels…');
+    try{
+      const r = await askJSON({schema:SCHEMA.levels, prompt:
+`Placement check results. Estimate the learner's CEFR level (A1, A2, B1, B2, C1) for each skill.
+Reading: ${pl.readingScore}% correct on a B1 text (2 easier + 2 harder questions).
+Listening: ${pl.listeningScore}% correct on a B1 monologue (text-to-speech, max 2 plays).
+Writing sample (task: introduce yourself, job at BOKU, life in Vienna, 40–80 words):
+"""${pl.writing}"""
+Quick typed answer (spontaneous, no dictionary; task: describe a typical workday to a new colleague, 2–5 sentences):
+"""${pl.produce}"""
+Learner's own self-assessment: listening B1, reading ~B1, writing A1–A2 (speaking A1–A2, not tested here).
+"writing" = the level of both written samples together.
+JSON: {"levels":{"reading","writing","listening"}, "improved_en": 1–2 sentences on strengths, "focus_en": 1–2 sentences on what to focus on first}`});
+      SKILLS.forEach(s => { const l = normLevel(r.levels[s]); if(l) P.levels[s] = l; });
+      P.startLevels = Object.assign({}, P.levels);
+      P.placementDone = true;
+      P.evidence.push({date:todayStr(), skill:'reading', score:pl.readingScore, textLevel:'B1'},
+                      {date:todayStr(), skill:'listening', score:pl.listeningScore, textLevel:'B1'});
+      P.weeklyReports.push({date:todayStr(), levels:Object.assign({}, P.levels), improved_en:r.improved_en, focus_en:r.focus_en, placement:true});
+      P.todaySession = null; addMinutes(10); saveProgress();
+      view.innerHTML = `<div class="card"><h2>Your starting levels</h2>
+        ${SKILLS.map(s => `<div class="kv"><span>${SKILL_ICON[s]} ${s[0].toUpperCase() + s.slice(1)}</span><span class="pill">${P.levels[s]}</span></div>`).join('')}
+        <p><b>Strengths:</b> ${esc(r.improved_en)}</p><p><b>Focus:</b> ${esc(r.focus_en)}</p>
+        <button class="btn" id="toToday">Build my first daily session →</button></div>`;
+      $('#toToday').onclick = () => go('today');
+    }catch(e){ view.innerHTML = errorHTML(e) + `<button class="btn" id="retryEval">Try again</button>`; $('#retryEval').onclick = evaluate; }
+  }
+}
+
+/* =====================================================================
+   18. PROGRESS DASHBOARD + WEEKLY LEVEL CHECK
+   ===================================================================== */
+function renderProgress(){
+  setTitle('Progress');
+  const weeks = [];
+  for(let i = 7; i >= 0; i--){ let s = 0; for(let d = 0; d < 7; d++) s += minutesOn(addDays(todayStr(), -(i * 7 + d))); weeks.push(s); }
+  const maxW = Math.max(30, ...weeks);
+  const top = topCategories(5);
+  const maxC = top.length ? top[0][1] : 1;
+  const last = P.weeklyReports[P.weeklyReports.length - 1];
+  const drillAcc = cat => { const d = P.drills.filter(x => x.category === cat).slice(-20); return d.length ? Math.round(100 * d.filter(x => x.correct).length / d.length) + '% in drills' : ''; };
+  view.innerHTML = `
+    <div class="stats"><div><b>🔥 ${streak()}</b><span class="muted small">day streak</span></div>
+      <div><b>${minutesOn(todayStr())}</b><span class="muted small">min today</span></div>
+      <div><b>${minutesLastDays(7)}</b><span class="muted small">min / 7 days</span></div></div>
+    <div class="card" style="margin-top:14px"><h3>Levels</h3>
+      ${SKILLS.map(s => { const i = levelIdx(P.levels[s]); return `<div style="margin:8px 0"><div class="kv"><span>${SKILL_ICON[s]} ${s[0].toUpperCase() + s.slice(1)}</span>
+        <span>${P.startLevels && P.startLevels[s] !== P.levels[s] ? `<span class="muted small">${P.startLevels[s]} → </span>` : ''}<span class="pill">${P.levels[s]}</span></span></div>
+        <div class="bar"><span style="width:${(i + 1) * 20}%"></span></div></div>`; }).join('')}
+      <p class="muted small">Goal: B2 (4th step). Updated by the weekly level check.</p>
+      <button class="btn sm secondary" id="weekly">📊 Run weekly level check</button><div id="weeklyOut"></div></div>
+    ${last ? `<div class="card"><h3>Latest note <span class="muted small">(${last.date})</span></h3>
+      <p><b>Improved:</b> ${esc(last.improved_en)}</p><p><b>Next week:</b> ${esc(last.focus_en)}</p></div>` : ''}
+    <div class="card"><h3>Minutes per week</h3>
+      <div class="chart">${weeks.map((m, i) => `<div class="col"><div style="font-size:11px">${m || ''}</div>
+        <span style="height:${Math.round(100 * m / maxW)}%"></span><div>${i === 7 ? 'now' : '−' + (7 - i)}</div></div>`).join('')}</div></div>
+    <div class="card"><h3>Top recurring errors (60 days)</h3>
+      ${top.length ? top.map(([c, n]) => `<div style="margin:8px 0"><div class="kv"><span>${esc(CATEGORY_LABELS[c])}</span><span class="muted small">${n}× ${drillAcc(c) ? '· ' + drillAcc(c) : ''}</span></div>
+        <div class="bar"><span style="width:${Math.round(100 * n / maxC)}%;background:var(--bad)"></span></div></div>`).join('') + `<button class="btn sm secondary" id="drillTop">🧩 Practise these</button>`
+      : '<p class="muted">No errors logged yet – do a Produce or writing task.</p>'}</div>
+    <div class="card"><details><summary>Recent corrections</summary>
+      ${P.errors.slice(-12).reverse().map(e => `<div class="err"><span class="pill">${esc(CATEGORY_LABELS[e.category] || e.category)}</span>
+        <span class="muted small">${e.date} · ${e.skill}</span><p class="de"><span class="wr">${esc(e.wrong)}</span> → <span class="rt">${esc(e.right)}</span></p></div>`).join('') || '<p class="muted">Nothing yet.</p>'}
+    </details></div>`;
+  $('#weekly').onclick = runWeeklyCheck;
+  const d = $('#drillTop'); if(d) d.onclick = () => startGrammar(null);
+}
+
+async function runWeeklyCheck(){
+  const out = $('#weeklyOut'); if(!out) return;
+  const lastDate = P.weeklyReports.length ? P.weeklyReports[P.weeklyReports.length - 1].date : P.createdAt;
+  const since = addDays(todayStr(), -14);
+  const ev = P.evidence.filter(e => e.date >= since);
+  if(!ev.length){ out.innerHTML = '<p class="muted">Not enough practice data from the last 2 weeks yet.</p>'; return; }
+  out.innerHTML = loadingHTML('Analysing your week…');
+  const summarize = s => {
+    const items = ev.filter(e => e.skill === s);
+    if(!items.length) return 'no data';
+    return items.map(e => e.level ? `${e.date}: answer judged ${e.level}` : `${e.date}: ${e.score}% on a ${e.textLevel} text${e.plays ? ` (${e.plays} plays)` : ''}`).join('; ');
+  };
+  const cats = topCategories(5, 14).map(([c, n]) => `${c} ${n}×`).join(', ') || 'none';
+  try{
+    const r = await askJSON({schema:SCHEMA.levels, prompt:
+`Weekly level check. Current levels: ${JSON.stringify(P.levels)}. Last check: ${lastDate}.
+Evidence from the last 14 days (most recent matters most):
+- writing: ${summarize('writing')}
+- reading: ${summarize('reading')}
+- listening: ${summarize('listening')}
+Most frequent error categories (14 days): ${cats}
+Practice minutes in the last 7 days: ${minutesLastDays(7)}.
+Estimate each skill's CEFR level now (A1–C1). Be conservative: change a level by at most one step and only with consistent evidence; keep it when evidence is thin.
+JSON: {"levels":{"reading","writing","listening"}, "improved_en": 1–2 sentences on what improved, "focus_en": 1–2 concrete sentences on what to focus on next week}`});
+    const before = Object.assign({}, P.levels);
+    SKILLS.forEach(s => {
+      const l = normLevel(r.levels[s]); if(!l) return;
+      const step = Math.max(-1, Math.min(1, levelIdx(l) - levelIdx(before[s])));   // max ±1 step per check
+      P.levels[s] = LEVELS[levelIdx(before[s]) + step];
+    });
+    P.weeklyReports.push({date:todayStr(), levels:Object.assign({}, P.levels), improved_en:r.improved_en, focus_en:r.focus_en});
+    if(P.todaySession && !P.todaySession.tasks.some(t => t.done)) P.todaySession = null;   // re-plan with new levels
+    saveProgress(); renderProgress(); toast('Weekly check saved ✓');
+  }catch(e){ out.innerHTML = errorHTML(e); }
+}
+
+/* =====================================================================
+   19. SETTINGS
+   ===================================================================== */
+function renderSettings(){
+  setTitle('Settings');
+  const voices = germanVoices();
+  view.innerHTML = `
+    <div class="card"><h3>🔑 API key</h3>
+      <p class="muted small">Stored only on this device (localStorage). It is only ever sent to Anthropic.</p>
+      <label for="aKey">Anthropic API key (Claude)</label>
+      <input id="aKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-ant-…" value="${esc(settings.anthropicKey)}">
+      <label><input type="checkbox" id="showKeys" style="width:auto"> Show key</label>
+      <button class="btn" id="saveKeys">Save</button>
+      <button class="btn secondary" id="testConn">Test connection</button>
+      <div id="testOut"></div></div>
+
+    <div class="card"><h3>🎯 Goals</h3>
+      <label for="goal">Daily goal (minutes)</label><input id="goal" type="number" min="10" max="180" value="${P.dailyGoal}">
+      <label for="len">Default session length</label>
+      <select id="len"><option value="30" ${P.sessionLength === 30 ? 'selected' : ''}>30 minutes</option><option value="60" ${P.sessionLength === 60 ? 'selected' : ''}>60 minutes</option></select>
+      <button class="btn sm secondary" id="saveGoals">Save goals</button></div>
+
+    <div class="card"><h3>🔊 Voice</h3>
+      ${voices.length ? `<select id="voice">${voices.map(v => `<option value="${esc(v.voiceURI)}" ${germanVoice && v.voiceURI === germanVoice.voiceURI ? 'selected' : ''}>${esc(v.name)} (${esc(v.lang)})</option>`).join('')}</select>`
+        : '<p class="muted small">No German voice found yet. On iPhone: Settings → Accessibility → Spoken Content → Voices → German (e.g. "Anna", enhanced quality).</p>'}
+      <button class="btn sm secondary" id="testVoice">Test voice</button></div>
+
+    <div class="card"><h3>🖼 App icon</h3>
+      <div id="iconPreview" class="row" style="align-items:center;gap:14px;flex-wrap:nowrap"></div>
+      <p class="muted small">Downloads <b>apple-touch-icon.png</b> (180×180), <b>icon-192.png</b> and <b>icon-512.png</b>. Upload them to your GitHub repo next to index.html, then re-add the app to your home screen to see the new icon. Easiest on a laptop.</p>
+      <button class="btn sm secondary" id="dlIcons">Download app icons</button></div>
+
+    <div class="card"><h3>💾 Your data</h3>
+      <p class="muted small">Last export: ${P.lastExport || 'never'}. Export weekly as a backup and to move progress between phone and laptop. Your API key is not included in the export.</p>
+      <button class="btn secondary" id="exp">Export progress (JSON)</button>
+      <button class="btn ghost" id="impBtn">Import progress</button><input type="file" id="imp" accept="application/json,.json" class="hidden">
+      <button class="btn danger sm" id="reset">Reset all progress</button></div>
+
+    <div class="card"><h3>📱 iPhone note</h3><p class="muted small">The home-screen app has its <b>own storage, separate from Safari</b>. Enter your key and import progress inside the installed app. This app works online only.</p></div>`;
+
+  $('#showKeys').onchange = e => { $('#aKey').type = e.target.checked ? 'text' : 'password'; };
+  const readKeys = () => {
+    settings.anthropicKey = $('#aKey').value.trim();
+    saveSettings();
+  };
+  $('#saveKeys').onclick = () => { readKeys(); toast('Saved ✓'); };
+  $('#testConn').onclick = () => { readKeys(); testConnections(); };
+  $('#saveGoals').onclick = () => {
+    P.dailyGoal = Math.max(10, Math.min(180, parseInt($('#goal').value) || 45));
+    const len = +$('#len').value;
+    if(len !== P.sessionLength){ P.sessionLength = len; if(P.todaySession && !P.todaySession.tasks.some(t => t.done)) P.todaySession = null; }
+    saveProgress(); toast('Goals saved ✓');
+  };
+  const vs = $('#voice'); if(vs) vs.onchange = () => { settings.voiceURI = vs.value; saveSettings(); loadVoice(); };
+  $('#testVoice').onclick = () => speak('Grüß Gott! Heute üben wir zusammen Deutsch. Viel Erfolg im Labor!');
+  $('#exp').onclick = () => { exportProgress(); renderSettings(); };
+  [[60, 'apple-touch-icon'], [44, '192'], [30, '512']].forEach(([px]) => {
+    const c = drawAppIcon(px * 2); c.style.cssText = `width:${px}px;height:${px}px;border-radius:${px * 0.22}px;flex:0 0 auto`;
+    $('#iconPreview').appendChild(c);
+  });
+  $('#dlIcons').onclick = downloadAppIcons;
+  $('#impBtn').onclick = () => $('#imp').click();
+  $('#imp').onchange = e => { if(e.target.files[0]) importProgress(e.target.files[0]); };
+  $('#reset').onclick = () => {
+    if(!confirm('Delete ALL progress on this device? (Export first if you want a backup.)')) return;
+    if(!confirm('Really? This cannot be undone.')) return;
+    P = defaultProgress(); saveProgress(); toast('Progress reset.'); go('today');
+  };
+}
+
+async function testConnections(){
+  const out = $('#testOut');
+  out.innerHTML = loadingHTML('Testing…');
+  const lines = [];
+  // 1) Claude
+  try{
+    const t = await callClaude({system:'Reply with the single word OK.', messages:[{role:'user', content:'Connection test'}], maxTokens:400, effort:'low'});
+    lines.push(`✅ Claude (${CLAUDE_MODEL}) works${t ? ` – replied “${esc(t.slice(0, 20))}”` : ''}.`);
+  }catch(e){ lines.push(`❌ Claude: ${esc(e.message)}`); }
+  out.innerHTML = `<div class="card" style="margin-top:10px;margin-bottom:0">${lines.map(l => `<p style="white-space:pre-wrap">${l}</p>`).join('')}</div>`;
+}
+
+/* =====================================================================
+   20. APP ICON – drawn on a canvas; Settings → "Download app icons" saves the PNGs
+   ===================================================================== */
+const ICON_FILES = [['apple-touch-icon.png', 180], ['icon-192.png', 192], ['icon-512.png', 512]];
+/** Draw the teal "B2" icon at any size on an offscreen canvas. */
+function drawAppIcon(size){
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const x = c.getContext('2d'), u = size / 100;            // draw in a 100×100 grid
+  const g = x.createLinearGradient(0, 0, size, size);
+  g.addColorStop(0, '#14b8a6'); g.addColorStop(1, '#0f766e');
+  x.fillStyle = g; x.fillRect(0, 0, size, size);           // full square: iOS/Android round the corners themselves
+  x.fillStyle = 'rgba(255,255,255,.14)';                   // soft speech bubble behind the text
+  x.beginPath(); x.ellipse(50 * u, 47 * u, 34 * u, 27 * u, 0, 0, Math.PI * 2); x.fill();
+  x.beginPath(); x.moveTo(33 * u, 68 * u); x.lineTo(28 * u, 80 * u); x.lineTo(44 * u, 72 * u); x.fill();
+  x.fillStyle = '#ffffff'; x.textAlign = 'center'; x.textBaseline = 'middle';
+  x.font = `800 ${36 * u}px -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`;
+  x.fillText('B2', 50 * u, 48 * u);
+  return c;
+}
+async function downloadAppIcons(){
+  for(const [name, size] of ICON_FILES){
+    const blob = await new Promise(res => drawAppIcon(size).toBlob(res, 'image/png'));
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+    await new Promise(r => setTimeout(r, 400));             // browsers block several downloads at the same instant
+  }
+  toast('3 icons downloaded – upload them next to index.html in your repo.');
+}
+
+migrateData();
+updateStreakBadge();
+go('today');
+</script>
+</body>
+</html>
